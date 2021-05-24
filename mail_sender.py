@@ -1,6 +1,5 @@
 import smtplib
-import email.message
-import email.utils
+import email
 import msc
 
 info_message_events = []
@@ -22,9 +21,6 @@ print(msg_body)
 
 # создание объекта "сообщение"
 msg = email.message.EmailMessage()
-print()
-print('___msg___')
-print(msg)
 
 # создание заголовков
 msg.set_content('some text')
@@ -45,11 +41,6 @@ msg.set_payload(msg_body.encode())
 print()
 print('___msg___')
 print(msg)
-
-# печать свойств объекта сообщения
-print()
-print('___dir(msg)___')
-print(dir(msg))
 
 # печать значений обекта
 print()
