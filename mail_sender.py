@@ -1,8 +1,8 @@
 import smtplib, email.message, email.utils, msc
 
 info_message_events = []
-# info_message_events.append('закрыты все процессы')
-# info_message_events.append('свободно места на диске')
+info_message_events.append('закрыты все процессы')
+info_message_events.append('свободно места на диске')
 info_message_events.append('eMail was sended by Python 3')
 
 # список из строк
@@ -27,7 +27,7 @@ print(msg)
 msg['Subject'] = msc.msc_msg_subject
 msg['From'] = msc.msc_from_address
 msg['To'] = msc.msc_to_address
-msg.set_content(msg_body)
+msg.set_payload(msg_body)
 
 # msg.as_string(msg)
 # msg.set_type('text/plain')  # 'text/plain; charset=utf-8'
