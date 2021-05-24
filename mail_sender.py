@@ -7,17 +7,17 @@ info_message_events.append('закрыты все процессы')
 info_message_events.append('свободно места на диске')
 info_message_events.append('eMail was sended by Python 3')
 
-# список из строк
-print()
-print('___info_message_events___')
-print(info_message_events)
+# # список из строк
+# print()
+# print('___info_message_events___')
+# print(info_message_events)
 
 # список соединённый в текст
 msg_body = '\r\n'.join(info_message_events)
 
-print()
-print('___msg_body___')
-print(msg_body)
+# print()
+# print('___msg_body___')
+# print(msg_body)
 
 # создание объекта "сообщение"
 msg = email.message.EmailMessage()
@@ -33,7 +33,6 @@ msg['To'] = msc.msc_to_address
 msg.set_payload(msg_body.encode())
 
 # msg.as_string(msg_body)
-
 # msg.as_string(msg)
 # msg['Body'] = msg_body
 
@@ -43,14 +42,14 @@ print('___msg___')
 print(msg)
 
 # печать значений обекта
-print()
-print('___msg.values()___')
-print(msg.values())
+# print()
+# print('___msg.values()___')
+# print(msg.values())
 
 # печать параметров объекта
-print()
-print('___msg.get_params()___')
-print(msg.get_params())
+# print()
+# print('___msg.get_params()___')
+# print(msg.get_params())
 
 # отправка письма
 smtp_link = smtplib.SMTP_SSL(msc.msc_mail_server)
