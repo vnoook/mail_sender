@@ -1,8 +1,8 @@
 import smtplib, email.message, email.utils, msc
 
 info_message_events = []
-info_message_events.append('закрыты все процессы')
-info_message_events.append('свободно места на диске')
+# info_message_events.append('закрыты все процессы')
+# info_message_events.append('свободно места на диске')
 info_message_events.append('eMail was sended by Python 3')
 
 # список из строк
@@ -11,10 +11,10 @@ print('___info_message_events___')
 print(info_message_events)
 
 # список соединённый в текст
-msg_post = '\r\n'.join(info_message_events)
+msg_body = '\r\n'.join(info_message_events)
 print()
-print('___msg_post___')
-print(msg_post)
+print('___msg_body___')
+print(msg_body)
 
 # создание объекта "сообщение"
 msg = email.message.EmailMessage()
@@ -27,9 +27,11 @@ print(msg)
 msg['Subject'] = msc.msc_msg_subject
 msg['From'] = msc.msc_from_address
 msg['To'] = msc.msc_to_address
-msg.set_content(msg_post)
-# msg['Body'] = 'msg_post msg_post msg_post msg_post msg_post'
-# msg.set_type('text/plain; charset=utf-8')
+msg.set_content(msg_body)
+
+# msg.as_string(msg)
+# msg.set_type('text/plain')  # 'text/plain; charset=utf-8'
+# msg['Body'] = msg_body
 
 
 # печать всего пакета сообщения
@@ -55,7 +57,8 @@ print(msg.get_params())
 # отправка письма
 smtp_link = smtplib.SMTP_SSL(msc.msc_mail_server)
 smtp_link.login(msc.msc_login_user, msc.msc_login_pass)
-smtp_link.sendmail(msc.msc_from_address, msc.msc_to_address, msc.msc_msg)
+# smtp_link.sendmail(msc.msc_from_address, msc.msc_to_address, msg)
+smtp_link.send_message(msg, msc.msc_from_address, msc.msc_to_address)
 smtp_link.quit()
 
 print()
