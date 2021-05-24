@@ -1,34 +1,42 @@
-import smtplib, email.message, email.utils, msc
+import smtplib
+import email.message
+import email.utils
+import msc
 
 info_message_events = []
 info_message_events.append('закрыты все процессы')
 info_message_events.append('свободно места на диске')
 info_message_events.append('eMail was sended by Python 3')
+
 # список из строк
-# print()
-# print('___info_message_events___')
-# print(info_message_events)
+print()
+print('___info_message_events___')
+print(info_message_events)
 
 # список соединённый в текст
 msg_body = '\r\n'.join(info_message_events)
-# print()
-# print('___msg_body___')
-# print(msg_body)
+
+print()
+print('___msg_body___')
+print(msg_body)
 
 # создание объекта "сообщение"
 msg = email.message.EmailMessage()
-# print()
-# print('___msg___')
-# print(msg)
+print()
+print('___msg___')
+print(msg)
 
 # создание заголовков
+msg.set_content('some text')
+msg.set_type('text/plain; charset=utf-8')  # msg.set_type('text/plain;') msg.set_charset('utf-8')
 msg['Date'] = email.utils.formatdate(localtime=True)
 msg['Subject'] = msc.msc_msg_subject
 msg['From'] = msc.msc_from_address
 msg['To'] = msc.msc_to_address
 
-msg.set_type('text/plain')  # 'text/plain; charset=utf-8'
-msg.set_payload(msg_body)
+msg.set_payload(msg_body.encode())
+
+# msg.as_string(msg_body)
 
 # msg.as_string(msg)
 # msg['Body'] = msg_body
