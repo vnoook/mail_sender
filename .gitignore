@@ -1,3 +1,6 @@
+/.idea/
+/data/
+/res/
 /msc.py
-/mails_table.txt
-/filelds.txt
+/*.xlsx
+/*.txt
