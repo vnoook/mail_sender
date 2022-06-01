@@ -28,9 +28,8 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         self.info_for_open_file = ''
         self.info_path_open_file = ''
 
-        self.info_extention_open_file = 'Файлы Excel xlsx (*.xlsx)'
-        # self.info_extention_open_file_html = 'Файлы HTML (*.html)'
-        # self.info_extention_open_file_xls = 'Файлы Excel (*.xlsx)'
+        self.info_extention_open_file_html = 'Файлы HTML (*.html)'
+        self.info_extention_open_file_xls = 'Файлы Excel xlsx (*.xlsx)'
 
         self.text_empty_path_file = 'файл пока не выбран'
 
@@ -200,15 +199,20 @@ class Window(PyQt5.QtWidgets.QMainWindow):
 
         # определение какая кнопка выбора файла нажата
         if self.sender().objectName() == self.toolButton_select_html_file.objectName():
-            self.info_for_open_file = 'Выберите Полный файл формата Excel, версии старше 2007 года (.XLSX)'
+            self.info_for_open_file = 'Выберите HTML файл (.HTML)'
+            # непосредственное окно выбора файла и переменная для хранения пути файла
+            data_of_open_file_name = PyQt5.QtWidgets.QFileDialog.getOpenFileName(self,
+                                                                                 self.info_for_open_file,
+                                                                                 self.info_path_open_file,
+                                                                                 self.info_extention_open_file_html)
         elif self.sender().objectName() == self.toolButton_select_xls_file.objectName():
-            self.info_for_open_file = 'Выберите Неполный файл формата Excel, версии старше 2007 года (.XLSX)'
+            self.info_for_open_file = 'Выберите Excel (.XLSX)'
+            # непосредственное окно выбора файла и переменная для хранения пути файла
+            data_of_open_file_name = PyQt5.QtWidgets.QFileDialog.getOpenFileName(self,
+                                                                                 self.info_for_open_file,
+                                                                                 self.info_path_open_file,
+                                                                                 self.info_extention_open_file_xls)
 
-        # непосредственное окно выбора файла и переменная для хранения пути файла
-        data_of_open_file_name = PyQt5.QtWidgets.QFileDialog.getOpenFileName(self,
-                                                                             self.info_for_open_file,
-                                                                             self.info_path_open_file,
-        !!!                                                                     self.info_extention_open_file)
         # выбор только пути файла из data_of_open_file_name
         file_name = data_of_open_file_name[0]
 
@@ -233,18 +237,9 @@ class Window(PyQt5.QtWidgets.QMainWindow):
                 self.label_path_xls_file.setText(file_name)
                 self.label_path_xls_file.adjustSize()
 
-        # активация и деактивация объектов на форме зависящее от выбраны ли все файлы и они разные
-        if self.label_path_full_file.text() != self.label_path_half_file.text():
-            # если выбранные файлы разные
-            if self.text_empty_path_file not in (self.label_path_full_file.text(), self.label_path_half_file.text()):
-                self.pushButton_send_mail.setEnabled(True)
-        else:
-            # если выбранные файлы одинаковые
-            self.pushButton_send_mail.setEnabled(False)
-            self.label_html_file.setText(f'1. Выберите HTML файл')
-            self.label_html_file.adjustSize()
-            self.label_xls_file.setText(f'2. Выберите Excel файл')
-            self.label_xls_file.adjustSize()
+        # активация и деактивация объектов на форме зависящее от "выбраны ли все файлы" и "они разные"
+        if self.text_empty_path_file not in (self.label_path_html_file.text(), self.label_path_xls_file.text()):
+            self.pushButton_send_mail.setEnabled(True)
 
     # def check_digit(self, string_data):
     #     # проверка lineEdit_max_string на число
@@ -307,7 +302,7 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         #     tuple_half_file = ()  # кортеж для хранения ФИО из Неполного файла
         #
         #     # счётчик удачных добавлений в Неполный из выбранных строк
-        #     count_add_succes = 0
+        #     count_add_success = 0
         #
         #     # заполнение list_half_file Неполного файла
         #     for row_in_range_half in wb_half_range:
