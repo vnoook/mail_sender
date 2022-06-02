@@ -28,7 +28,7 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         self.info_for_open_file = ''
         self.info_path_open_file = ''
 
-        self.info_extention_open_file_html = 'Файлы HTML (*.html)'
+        self.info_extention_open_file_html = 'Файлы HTML (*.html; *.htm)'
         self.info_extention_open_file_xls = 'Файлы Excel xlsx (*.xlsx)'
 
         self.text_empty_path_file = 'файл пока не выбран'
@@ -66,7 +66,7 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         self.toolButton_select_html_file.setText('...')
         self.toolButton_select_html_file.setGeometry(PyQt5.QtCore.QRect(10, 40, 50, 20))
         self.toolButton_select_html_file.setFixedWidth(50)
-        self.toolButton_select_html_file.clicked.connect(self.select_file)  # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        self.toolButton_select_html_file.clicked.connect(self.select_file)
         self.toolButton_select_html_file.setToolTip(self.toolButton_select_html_file.objectName())
 
         # label_path_html_file
@@ -98,7 +98,7 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         self.toolButton_select_xls_file.setText('...')
         self.toolButton_select_xls_file.setGeometry(PyQt5.QtCore.QRect(10, 100, 50, 20))
         self.toolButton_select_xls_file.setFixedWidth(50)
-        self.toolButton_select_xls_file.clicked.connect(self.select_file)  # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        self.toolButton_select_xls_file.clicked.connect(self.select_file)
         self.toolButton_select_xls_file.setToolTip(self.toolButton_select_xls_file.objectName())
 
         # label_path_xls_file
@@ -132,10 +132,7 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         # self.lineEdit_q_pocket.setClearButtonEnabled(True)
         self.lineEdit_q_pocket.setEnabled(False)
         self.lineEdit_q_pocket.setToolTip(self.lineEdit_q_pocket.objectName())
-        # self.lineEdit_q_pocket.textEdited.connect(self.check_digit)  # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        # 18
-        gui is complete, ver
-        1
+
         # Q_MESSAGES
         # label_q_messages
         self.label_q_messages = PyQt5.QtWidgets.QLabel(self)
@@ -156,7 +153,6 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         # self.lineEdit_q_messages.setClearButtonEnabled(True)
         self.lineEdit_q_messages.setEnabled(False)
         self.lineEdit_q_messages.setToolTip(self.lineEdit_q_pocket.objectName())
-        # self.lineEdit_q_messages.textEdited.connect(self.check_digit)  # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
         # MAIL_DELAY
         # label_mail_delay
@@ -178,7 +174,6 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         # self.lineEdit_q_messages.setClearButtonEnabled(True)
         self.lineEdit_mail_delay.setEnabled(False)
         self.lineEdit_mail_delay.setToolTip(self.lineEdit_mail_delay.objectName())
-        # self.lineEdit_q_messages.textEdited.connect(self.check_digit)  # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
         # SEND_MAIL
         # pushButton_send_mail
@@ -188,7 +183,7 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         self.pushButton_send_mail.setText('Отправьте почту')
         self.pushButton_send_mail.setGeometry(PyQt5.QtCore.QRect(10, 310, 180, 25))
         self.pushButton_send_mail.setFixedWidth(130)
-        self.pushButton_send_mail.clicked.connect(self.do_fill_data)  # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        self.pushButton_send_mail.clicked.connect(self.send_mail)
         self.pushButton_send_mail.setToolTip(self.pushButton_send_mail.objectName())
 
         # TEXT_STATISTICS
@@ -210,7 +205,7 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         self.button_exit.setText('Выход')
         self.button_exit.setGeometry(PyQt5.QtCore.QRect(10, 410, 180, 25))
         self.button_exit.setFixedWidth(50)
-        self.button_exit.clicked.connect(self.click_on_btn_exit)  # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        self.button_exit.clicked.connect(self.click_on_btn_exit)
         self.button_exit.setToolTip(self.button_exit.objectName())
 
     # событие - нажатие на кнопку выбора файла
@@ -221,7 +216,7 @@ class Window(PyQt5.QtWidgets.QMainWindow):
 
         # определение какая кнопка выбора файла нажата
         if self.sender().objectName() == self.toolButton_select_html_file.objectName():
-            self.info_for_open_file = 'Выберите HTML файл (.HTML)'
+            self.info_for_open_file = 'Выберите HTML файл (.HTML или .HTM)'
             # непосредственное окно выбора файла и переменная для хранения пути файла
             data_of_open_file_name = PyQt5.QtWidgets.QFileDialog.getOpenFileName(self,
                                                                                  self.info_for_open_file,
@@ -263,47 +258,11 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         if self.text_empty_path_file not in (self.label_path_html_file.text(), self.label_path_xls_file.text()):
             self.pushButton_send_mail.setEnabled(True)
 
-    # def check_digit(self, string_data):
-    #     # проверка lineEdit_max_string на число
-    #     flag_digit = None
-    #
-    #     if string_data.isdigit():
-    #         flag_digit = True
-    #     elif string_data == '':
-    #         flag_digit = False
-    #         self.lineEdit_max_string.setText('0')
-    #     else:
-    #         flag_digit = False
-    #
-    #         # информационное окно - "введите число"
-    #         self.window_info = PyQt5.QtWidgets.QMessageBox()
-    #         self.window_info.setWindowTitle('Только цифры')
-    #         self.window_info.setText(f'Вводите только цифры!')
-    #         self.window_info.exec_()
-    #
-    #         self.lineEdit_max_string.setText('0')
-    #
-    #     return flag_digit
-
     # событие - нажатие на кнопку заполнения файла
-    def do_fill_data(self):
-        pass
+    def send_mail(self):
+        # считаю время заполнения
+        time_start = time.time()
 
-        # # выбор выбранных строк в списке специальностей
-        # specialization_selected = [item.text() for item in self.listWidget_specialization.selectedItems()]
-        #
-        # # проверка на количество выбранных строк в listWidget_specialization
-        # if len(specialization_selected) == 0:
-        #     # информационное окно - "выберите специальность"
-        #     self.window_info = PyQt5.QtWidgets.QMessageBox()
-        #     self.window_info.setWindowTitle('Выберите специальности')
-        #     self.window_info.setText(f'В списке специальностей ничего не выбрано,\n'
-        #                              f'выберите хотя бы одну строку')
-        #     self.window_info.exec_()
-        # else:
-        #     # считаю время заполнения
-        #     time_start = time.time()
-        #
         #     # открыть файл Полный и Неполный, и выбрать листы
         #     wb_full = openpyxl.load_workbook(self.label_path_full_file.text())
         #     wb_full_s = wb_full.active
@@ -402,15 +361,16 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         #             wb_full.close()
         #             wb_half.close()
         #
-        #             # считаю время заполнения
-        #             time_finish = time.time()
-        #
-        #             # информационное окно о сохранении файлов
-        #             self.window_info = PyQt5.QtWidgets.QMessageBox()
-        #             self.window_info.setWindowTitle('Файлы')
-        #             self.window_info.setText(f'Файлы сохранены и закрыты.\n'
-        #                                      f'Заполнение сделано за {round(time_finish - time_start, 1)} секунд')
-        #             self.window_info.exec_()
+
+        # считаю время заполнения
+        time_finish = time.time()
+
+        # информационное окно об окончании работы программы
+        self.window_info = PyQt5.QtWidgets.QMessageBox()
+        self.window_info.setWindowTitle('Окончено')
+        self.window_info.setText(f'Файлы закрыты.\n'
+                                 f'Отправка писем сделана за {round(time_finish - time_start, 1)} секунд.')
+        self.window_info.exec_()
 
     # событие - нажатие на кнопку Выход
     @staticmethod
