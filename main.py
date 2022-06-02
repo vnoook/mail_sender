@@ -260,28 +260,26 @@ class Window(PyQt5.QtWidgets.QMainWindow):
 
     # событие - нажатие на кнопку заполнения файла
     def send_mail(self):
-        # считаю время заполнения
+        # считаю время "начало"
         time_start = time.time()
 
-        # открыть файл Полный и Неполный, и выбрать листы
+        # открываю файл XLS и выбираю активный лист
         wb_xls = openpyxl.load_workbook(self.label_path_xls_file.text())
         wb_xls_s = wb_xls.active
+
+        # открываю файл HTML
+        with open(self.label_path_html_file.text(), 'r') as file_html:
+            all_strings_html_file = file_html.read()
+        print(all_strings_html_file)
+
+
+
 
         #     # сформированные диапазоны обработки
         #     range_full_file = self.range_all_files + wb_full_s.cell(wb_full_s.max_row, wb_full_s.max_column).coordinate
         #     range_half_file = self.range_all_files + wb_half_s.cell(wb_half_s.max_row, wb_half_s.max_column).coordinate
         #     wb_full_range = wb_full_s[range_full_file]
         #     wb_half_range = wb_half_s[range_half_file]
-        #
-        #     # список одной строки прохода, список выбранных строк по специальностям, списки всех строк Неполного файла
-        #     list_one_string = []  # временная переменная
-        #     list_half_file = []  # весь Неполный файл
-        #     list_filtered_string = []  # фильтрованные строки из Полного которые устраивают выбранным специальностям
-        #     list_for_add = []  # список выбранных из фильтрованных для добавления в Неполный файл
-        #     tuple_half_file = ()  # кортеж для хранения ФИО из Неполного файла
-        #
-        #     # счётчик удачных добавлений в Неполный из выбранных строк
-        #     count_add_success = 0
         #
         #     # заполнение list_half_file Неполного файла
         #     for row_in_range_half in wb_half_range:
@@ -294,69 +292,13 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         #
         #         # все записи из Неполного файла
         #         list_half_file.append(list_one_string)
-        #
-        #     # количество строк "сколько хочу строк" (перевод значения в поле шага 3)
-        #     count_string_want = int(self.lineEdit_max_string.text())
-        #
-        #     # количество строк в Неполном файле (-1 потому что верхняя строка это шапка)
-        #     count_string_half = wb_half_s.max_row - 1
-        #
-        #     # сколько нужно добавить строк в Неполный файл, должно быть больше нуля
-        #     count_string_add = count_string_want - count_string_half
-        #
-        #     # количество строк в отфильтрованном списке
-        #     count_filter_string = len(list_filtered_string)
-        #
-        #     # количество строк которых будет реально добавлены в Неполный файл
-        #     count_real_data_add = count_filter_string - count_string_add
-        #
-        #     # добавление строк в Неполный файл
-        #     # если количество строк в Неполном меньше, чем хочется, то добавить разницу строк
-        #     if count_string_add <= 0:
-        #         # информационное окно - ""
-        #         self.window_info = PyQt5.QtWidgets.QMessageBox()
-        #         self.window_info.setWindowTitle('Строки')
-        #         self.window_info.setText(f'Количество строк в Неполном файле\n'
-        #                                  f'одинаково или больше,\n'
-        #                                  f'чем число в ПУНКТЕ 3'
-        #                                  # f' \n'
-        #                                  # f'их разница равна {count_string_add}\n'
-        #                                  # f'хочется чтобы было {count_string_want}\n'
-        #                                  # f'сейчас в файле {count_string_half}\n'
-        #                                  # f'надо добавить {count_string_add}\n'
-        #                                  # f'могу выбрать из {count_filter_string}'
-        #                                  )
-        #         self.window_info.exec_()
-        #     else:
-        #         if count_string_add > count_filter_string:
-        #             # если добавляемых больше, чем отфильтрованных, то добавлять всё из list_filtered_string
-        #             # информационное окно
-        #             self.window_info = PyQt5.QtWidgets.QMessageBox()
-        #             self.window_info.setWindowTitle('Строки')
-        #             self.window_info.setText(f'Количество строк в Полном файле по этим специальностям\n'
-        #                                      f'меньше, чем число в ПУНКТЕ 3,\n'
-        #                                      f'выберите ещё специальностей из списка\n'
-        #                                      # f' \n'
-        #                                      # f'их разница равна {count_real_data_add}\n'
-        #                                      # f'хочется чтобы было {count_string_want}\n'
-        #                                      # f'сейчас в файле {count_string_half}\n'
-        #                                      # f'надо добавить {count_string_add}\n'
-        #                                      # f'могу выбрать из {count_filter_string}'
-        #                                      )
-        #             self.window_info.exec_()
-        #         else:
-        #             # последняя строка в Неполном +2 потому, что один за прошлый вычет, а один на следующую строчку
-        #             string_half_begin = (count_string_half + 1) + 1
-        #             string_half_end = (count_string_half + 1) + len(list_for_add)
-        #
-        #             # добавление данных в эксель
-        #             for string_list_for_add in list_for_add:
-        #                 wb_half_s.append(string_list_for_add)
+
+
 
         # закрываю файл
         wb_xls.close()
 
-        # считаю время заполнения
+        # считаю время "конец"
         time_finish = time.time()
 
         # информационное окно об окончании работы программы
