@@ -43,11 +43,9 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         # # начало диапазона поиска строк в обоих файлах
         # self.range_all_files = 'A2:'
 
-        pass
-
         # главное окно, надпись на нём и размеры
         self.setWindowTitle('Рассылка почты из XLS файла на основе шаблона HTML')
-        self.setGeometry(600, 200, 700, 400)
+        self.setGeometry(600, 200, 700, 450)
 
         # объекты на форме
         # HTML
@@ -135,12 +133,14 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         self.lineEdit_q_pocket.setEnabled(False)
         self.lineEdit_q_pocket.setToolTip(self.lineEdit_q_pocket.objectName())
         # self.lineEdit_q_pocket.textEdited.connect(self.check_digit)  # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
+        # 18
+        gui is complete, ver
+        1
         # Q_MESSAGES
         # label_q_messages
         self.label_q_messages = PyQt5.QtWidgets.QLabel(self)
         self.label_q_messages.setObjectName('label_q_messages')
-        self.label_q_messages.setText('4. Задержка между пакетами, сек.')
+        self.label_q_messages.setText('4. Задержка между письмами, сек.')
         self.label_q_messages.setGeometry(PyQt5.QtCore.QRect(10, 190, 150, 40))
         font = PyQt5.QtGui.QFont()
         font.setPointSize(12)
@@ -158,13 +158,35 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         self.lineEdit_q_messages.setToolTip(self.lineEdit_q_pocket.objectName())
         # self.lineEdit_q_messages.textEdited.connect(self.check_digit)  # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+        # MAIL_DELAY
+        # label_mail_delay
+        self.label_mail_delay = PyQt5.QtWidgets.QLabel(self)
+        self.label_mail_delay.setObjectName('label_mail_delay')
+        self.label_mail_delay.setText('5. Задержка между отправками пакетов, мин.')
+        self.label_mail_delay.setGeometry(PyQt5.QtCore.QRect(10, 250, 150, 40))
+        font = PyQt5.QtGui.QFont()
+        font.setPointSize(12)
+        self.label_mail_delay.setFont(font)
+        self.label_mail_delay.adjustSize()
+        self.label_mail_delay.setToolTip(self.label_mail_delay.objectName())
+
+        # lineEdit_mail_delay
+        self.lineEdit_mail_delay = PyQt5.QtWidgets.QLineEdit(self)
+        self.lineEdit_mail_delay.setObjectName('lineEdit_mail_delay')
+        self.lineEdit_mail_delay.setText(self.send_delay)
+        self.lineEdit_mail_delay.setGeometry(PyQt5.QtCore.QRect(10, 280, 90, 20))
+        # self.lineEdit_q_messages.setClearButtonEnabled(True)
+        self.lineEdit_mail_delay.setEnabled(False)
+        self.lineEdit_mail_delay.setToolTip(self.lineEdit_mail_delay.objectName())
+        # self.lineEdit_q_messages.textEdited.connect(self.check_digit)  # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
         # SEND_MAIL
         # pushButton_send_mail
         self.pushButton_send_mail = PyQt5.QtWidgets.QPushButton(self)
         self.pushButton_send_mail.setObjectName('pushButton_send_mail')
         self.pushButton_send_mail.setEnabled(False)
         self.pushButton_send_mail.setText('Отправьте почту')
-        self.pushButton_send_mail.setGeometry(PyQt5.QtCore.QRect(10, 260, 180, 25))
+        self.pushButton_send_mail.setGeometry(PyQt5.QtCore.QRect(10, 310, 180, 25))
         self.pushButton_send_mail.setFixedWidth(130)
         self.pushButton_send_mail.clicked.connect(self.do_fill_data)  # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         self.pushButton_send_mail.setToolTip(self.pushButton_send_mail.objectName())
@@ -174,7 +196,7 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         self.label_text_statistics = PyQt5.QtWidgets.QLabel(self)
         self.label_text_statistics.setObjectName('label_text_statistics')
         self.label_text_statistics.setText('Статистика отправки:\n')
-        self.label_text_statistics.setGeometry(PyQt5.QtCore.QRect(10, 300, 150, 40))
+        self.label_text_statistics.setGeometry(PyQt5.QtCore.QRect(10, 340, 150, 40))
         font = PyQt5.QtGui.QFont()
         font.setPointSize(12)
         self.label_text_statistics.setFont(font)
@@ -186,7 +208,7 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         self.button_exit = PyQt5.QtWidgets.QPushButton(self)
         self.button_exit.setObjectName('button_exit')
         self.button_exit.setText('Выход')
-        self.button_exit.setGeometry(PyQt5.QtCore.QRect(10, 350, 180, 25))
+        self.button_exit.setGeometry(PyQt5.QtCore.QRect(10, 410, 180, 25))
         self.button_exit.setFixedWidth(50)
         self.button_exit.clicked.connect(self.click_on_btn_exit)  # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         self.button_exit.setToolTip(self.button_exit.objectName())
