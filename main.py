@@ -263,12 +263,10 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         # считаю время заполнения
         time_start = time.time()
 
-        #     # открыть файл Полный и Неполный, и выбрать листы
-        #     wb_full = openpyxl.load_workbook(self.label_path_full_file.text())
-        #     wb_full_s = wb_full.active
-        #     wb_half = openpyxl.load_workbook(self.label_path_half_file.text())
-        #     wb_half_s = wb_half.active
-        #
+        # открыть файл Полный и Неполный, и выбрать листы
+        wb_xls = openpyxl.load_workbook(self.label_path_xls_file.text())
+        wb_xls_s = wb_xls.active
+
         #     # сформированные диапазоны обработки
         #     range_full_file = self.range_all_files + wb_full_s.cell(wb_full_s.max_row, wb_full_s.max_column).coordinate
         #     range_half_file = self.range_all_files + wb_half_s.cell(wb_half_s.max_row, wb_half_s.max_column).coordinate
@@ -354,13 +352,9 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         #             # добавление данных в эксель
         #             for string_list_for_add in list_for_add:
         #                 wb_half_s.append(string_list_for_add)
-        #
-        #             # сохраняю файл и закрываю оба
-        #             filename_half = os.path.split(self.label_path_half_file.text())[1]
-        #             wb_half.save(filename_half)
-        #             wb_full.close()
-        #             wb_half.close()
-        #
+
+        # закрываю файл
+        wb_xls.close()
 
         # считаю время заполнения
         time_finish = time.time()
