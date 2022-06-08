@@ -278,6 +278,8 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         with open(self.label_path_html_file.text(), 'r') as file_html:
             all_strings_html_file = file_html.read()
         print(all_strings_html_file)
+        print()
+
 
 
 
