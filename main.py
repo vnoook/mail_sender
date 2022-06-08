@@ -282,23 +282,23 @@ class Window(PyQt5.QtWidgets.QMainWindow):
 
 
 
-        #     # сформированные диапазоны обработки
-        #     range_full_file = self.range_all_files + wb_full_s.cell(wb_full_s.max_row, wb_full_s.max_column).coordinate
-        #     range_half_file = self.range_all_files + wb_half_s.cell(wb_half_s.max_row, wb_half_s.max_column).coordinate
-        #     wb_full_range = wb_full_s[range_full_file]
-        #     wb_half_range = wb_half_s[range_half_file]
+        # # сформированные диапазоны обработки
+        # range_full_file = self.range_all_files + wb_full_s.cell(wb_full_s.max_row, wb_full_s.max_column).coordinate
+        # range_half_file = self.range_all_files + wb_half_s.cell(wb_half_s.max_row, wb_half_s.max_column).coordinate
+        # wb_full_range = wb_full_s[range_full_file]
+        # wb_half_range = wb_half_s[range_half_file]
         #
-        #     # заполнение list_half_file Неполного файла
-        #     for row_in_range_half in wb_half_range:
-        #         # чищу список для временной строки
-        #         list_one_string = []
+        # # заполнение list_half_file Неполного файла
+        # for row_in_range_half in wb_half_range:
+        #     # чищу список для временной строки
+        #     list_one_string = []
         #
-        #         # прохожу строку
-        #         for cell_in_row_half in row_in_range_half:
-        #             list_one_string.append(cell_in_row_half.value)
+        #     # прохожу строку
+        #     for cell_in_row_half in row_in_range_half:
+        #         list_one_string.append(cell_in_row_half.value)
         #
-        #         # все записи из Неполного файла
-        #         list_half_file.append(list_one_string)
+        #     # все записи из Неполного файла
+        #     list_half_file.append(list_one_string)
 
 
 
