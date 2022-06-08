@@ -31,6 +31,7 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         super(Window, self).__init__()
 
         # переменные, атрибуты
+        self.window_info = None
         self.info_for_open_file = ''
         self.info_path_open_file = ''
 
@@ -53,7 +54,7 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         self.setWindowTitle('Рассылка почты из XLS файла на основе шаблона HTML')
         self.setGeometry(600, 200, 700, 450)
 
-        # объекты на форме
+        # ОБЪЕКТЫ НА ФОРМЕ
         # HTML
         # label_html_file
         self.label_html_file = PyQt5.QtWidgets.QLabel(self)
