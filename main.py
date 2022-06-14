@@ -297,6 +297,13 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         # считаю время "начало"
         time_start = time.time()
 
+        # HTML ==---------------------------------
+        # открываю файл HTML
+        with open(self.label_path_html_file.text(), 'r') as file_html:
+            all_strings_html_file = file_html.read()
+        print(all_strings_html_file)
+        print()
+
         # XLS ==---------------------------------
         # открываю файл XLS и выбираю активный лист
         wb_xls = openpyxl.load_workbook(self.label_path_xls_file.text())
@@ -340,14 +347,6 @@ class Window(PyQt5.QtWidgets.QMainWindow):
 
         # закрываю файл
         wb_xls.close()
-
-
-        # HTML ==---------------------------------
-        # открываю файл HTML
-        with open(self.label_path_html_file.text(), 'r') as file_html:
-            all_strings_html_file = file_html.read()
-        print(all_strings_html_file)
-        print()
 
         # считаю время "конец"
         time_finish = time.time()
