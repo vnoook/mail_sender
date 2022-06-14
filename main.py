@@ -46,14 +46,14 @@ class RecipientData:
 
     def get_all_info(self):
         return f'Объект {self.get_recipient_class_name()}, ' \
-               f'{self.num()},' \
+               f'{self.num},' \
                f'{self.fam}, ' \
                f'{self.im},' \
-               f'{self.otch()}, ' \
-               f'{self.email()}, ' \
-               f'{self.mno_code()},' \
-               f'{self.text_message()},' \
-               f'{self.flag_send_message()}'
+               f'{self.otch}, ' \
+               f'{self.email}, ' \
+               f'{self.mno_code},' \
+               f'{self.text_message},' \
+               f'{self.flag_send_message}'
 
     def get_recipient_class_name(self):
         for k, v in globals().items():
@@ -348,8 +348,8 @@ class Window(PyQt5.QtWidgets.QMainWindow):
                             rd_mno_code=wb_xls_s.cell(row_in_xls, 6).value)
 
             for count_obj in range(1, RecipientData.count_Recipient+1):
-                print(f'{globals()["Recipient" + str(count_obj)]}')
-                # print(f'{globals()["Recipient" + str(count_obj)].get_all_info()}')/
+                # print(f'{globals()["Recipient" + str(count_obj)]}')
+                print(f'{globals()["Recipient" + str(count_obj)].get_all_info()}')
                 # print(f'{globals()}')
 
             # time.sleep(0.1)
