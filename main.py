@@ -42,15 +42,14 @@ class RecipientData:
 
     def get_all_info(self):
         return f'Объект {self.get_recipient_class_name()}, ' \
-               f'id = {id(self.get_recipient_class_name())}, ' \
-               f'{self.num}, ' \
-               f'{self.fam}, ' \
-               f'{self.im}, ' \
-               f'{self.otch}, ' \
-               f'{self.email}, ' \
-               f'{self.mno_code}, ' \
-               f'{self.text_message}, ' \
-               f'{self.flag_send_message}'
+               f'{self.num = }, ' \
+               f'{self.fam = }, ' \
+               f'{self.im = }, ' \
+               f'{self.otch = }, ' \
+               f'{self.email = }, ' \
+               f'{self.mno_code = }, ' \
+               f'{self.text_message = }, ' \
+               f'{self.flag_send_message = }'
 
     def get_recipient_class_name(self):
         for glob_name, glob_val in globals().items():
@@ -331,35 +330,36 @@ class Window(PyQt5.QtWidgets.QMainWindow):
                     if cell_value != 'email':  # если не колонка с почтами
                         list_replaced_words.append(chars_for_replace.replace('xxx', cell_value))
                 else:
-                    # если последняя колонка, то создаётся объект и заполняется значениями из строки
-                    if col_in_xls == wb_xls_s.max_column:
-                        # создаётся экземпляр  /ЭТА РЕАЛИЗАЦИЯ МНЕ НЕ НРАВИТСЯ/
-                        globals()['Recipient' + str(wb_xls_s.cell(row_in_xls, 1).value)] =\
-                            RecipientData(rd_num=wb_xls_s.cell(row_in_xls, 1).value,
-                                          rd_fam=wb_xls_s.cell(row_in_xls, 2).value,
-                                          rd_im=wb_xls_s.cell(row_in_xls, 3).value,
-                                          rd_otch=wb_xls_s.cell(row_in_xls, 4).value,
-                                          rd_email=wb_xls_s.cell(row_in_xls, 5).value,
-                                          rd_mno_code=wb_xls_s.cell(row_in_xls, 6).value)
+                    if col_in_xls == wb_xls_s.min_column:
+                        globals()['Recipient' + str(wb_xls_s.cell(row_in_xls, wb_xls_s.min_column).value)] =\
+                            RecipientData(rd_num=wb_xls_s.cell(row_in_xls, wb_xls_s.min_column).value)
+                    else:
+                        if wb_xls_s.cell(1, col_in_xls).value == 'text_message':
+                            globals()['Recipient' + str(wb_xls_s.cell(row_in_xls, wb_xls_s.min_column).value)].\
+                                __setattr__('text_message', all_strings_html_file)
+                        else:
+                            globals()['Recipient' + str(wb_xls_s.cell(row_in_xls, wb_xls_s.min_column).value)].\
+                                __setattr__(str(wb_xls_s.cell(1, col_in_xls).value), cell_value)
+
+
+
+
+
+                    # # если последняя колонка, то создаётся объект и заполняется значениями из строки
+                    # if col_in_xls == wb_xls_s.max_column:
+                    #     # создаётся экземпляр  /ЭТА РЕАЛИЗАЦИЯ МНЕ НЕ НРАВИТСЯ/
+                    #     globals()['Recipient' + str(wb_xls_s.cell(row_in_xls, 1).value)] =\
+                    #         RecipientData(rd_num=wb_xls_s.cell(row_in_xls, 1).value,
+                    #                       rd_fam=wb_xls_s.cell(row_in_xls, 2).value,
+                    #                       rd_im=wb_xls_s.cell(row_in_xls, 3).value,
+                    #                       rd_otch=wb_xls_s.cell(row_in_xls, 4).value,
+                    #                       rd_email=wb_xls_s.cell(row_in_xls, 5).value,
+                    #                       rd_mno_code=wb_xls_s.cell(row_in_xls, 6).value)
 
         for count_obj in range(1, RecipientData.count_Recipient + 1):
             print(f'{globals()["Recipient" + str(count_obj)].get_all_info()}')
 
         # time.sleep(0.1)
-
-        # def create_anglers():
-        #     # создание экземпляров рыбаков по количеству из table_anglers
-        #     for angler_id, angler_fio in table_anglers.items():
-        #         # создаётся название экземпляра
-        #         string_angler_class = 'Angler' + str(angler_id)
-        #
-        #         # создаётся экземпляр
-        #         globals()[string_angler_class] = Angler(angler_id,
-        #                                                 angler_fio,
-        #                                                 a_rank=table_anglers_rank[angler_id],
-        #                                                 a_team=table_anglers_teams[angler_id]
-        #                                                 )
-        #         print(f'{globals()["Angler" + str(angler_id)].get_all_info()}')
 
         # закрываю файл
         wb_xls.close()
