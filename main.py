@@ -270,26 +270,44 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         # считаю время "начало"
         time_start = time.time()
 
+        print(self.label_path_html_file.text())
+        print(self.label_path_xls_file.text())
+        print()
+
+        # XLS
         # открываю файл XLS и выбираю активный лист
         wb_xls = openpyxl.load_workbook(self.label_path_xls_file.text())
         wb_xls_s = wb_xls.active
 
-        # открываю файл HTML
-        with open(self.label_path_html_file.text(), 'r') as file_html:
-            all_strings_html_file = file_html.read()
-        print(all_strings_html_file)
+        # переменные для обработки XLS
+        list_replaced_words = []  # список слов для замены в HTML файле
+        chars_for_replace = '{{xxx}}'  # шаблон для замены в HTML файле
+
+        # получение значений ячеек из XLS файла
+        for row_in_xls in range(wb_xls_s.min_row, wb_xls_s.max_row+1):
+            for col_in_xls in range(wb_xls_s.min_column, wb_xls_s.max_column+1):
+                cell_value = wb_xls_s.cell(row_in_xls, col_in_xls).value
+
+                # формирование списка спец строк, которые нужно будет заменить
+                if row_in_xls == 1:
+                    if col_in_xls != 5:
+                        list_replaced_words.append(chars_for_replace.replace('xxx', cell_value))
+
+                    if col_in_xls == wb_xls_s.max_column:
+                        print(list_replaced_words)
+                else:
+                    pass
+                # print()
+
+            # time.sleep(0.1)
+
         print()
 
 
-
-
-
         # # сформированные диапазоны обработки
-        # range_full_file = self.range_all_files + wb_full_s.cell(wb_full_s.max_row, wb_full_s.max_column).coordinate
-        # range_half_file = self.range_all_files + wb_half_s.cell(wb_half_s.max_row, wb_half_s.max_column).coordinate
-        # wb_full_range = wb_full_s[range_full_file]
-        # wb_half_range = wb_half_s[range_half_file]
-        #
+        # range_xls_file = self.range_all_files + wb_full_s.cell(wb_full_s.max_row, wb_full_s.max_column).coordinate
+        # wb_xls_s_range = wb_full_s[range_full_file]
+
         # # заполнение list_half_file Неполного файла
         # for row_in_range_half in wb_half_range:
         #     # чищу список для временной строки
@@ -302,10 +320,16 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         #     # все записи из Неполного файла
         #     list_half_file.append(list_one_string)
 
-
-
         # закрываю файл
         wb_xls.close()
+
+
+        # HTML
+        # открываю файл HTML
+        with open(self.label_path_html_file.text(), 'r') as file_html:
+            all_strings_html_file = file_html.read()
+        print(all_strings_html_file)
+        print()
 
         # считаю время "конец"
         time_finish = time.time()
