@@ -13,7 +13,7 @@
 # pyinstaller -F -w main.py
 # ...
 
-import os
+# import os
 import sys
 import time
 import PyQt5
@@ -30,11 +30,11 @@ class RecipientData:
 
     count_Recipient = 0
 
-    def __init__(self, rd_number, rd_familia, rd_imya, rd_otchestvo, rd_email, rd_mno_code):
-        self.number = rd_number
-        self.familia = rd_familia
-        self.imya = rd_imya
-        self.otchestvo = rd_otchestvo
+    def __init__(self, rd_num=None, rd_fam=None, rd_im=None, rd_otch=None, rd_email=None, rd_mno_code=None):
+        self.num = rd_num
+        self.fam = rd_fam
+        self.im = rd_im
+        self.otch = rd_otch
         self.email = rd_email
         self.mno_code = rd_mno_code
         self.text_message = None
@@ -301,8 +301,6 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         # открываю файл HTML
         with open(self.label_path_html_file.text(), 'r') as file_html:
             all_strings_html_file = file_html.read()
-        print(all_strings_html_file)
-        print()
 
         # XLS ==---------------------------------
         # открываю файл XLS и выбираю активный лист
@@ -312,38 +310,69 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         # переменные для обработки XLS
         list_replaced_words = []  # список слов для замены в HTML файле
         chars_for_replace = '{{xxx}}'  # шаблон для замены в HTML файле
+        cell_value, cell_coord = None, None  # инициализировал переменные, а то ИДЭ ругается ))
 
         # получение значений ячеек из XLS файла
         for row_in_xls in range(wb_xls_s.min_row, wb_xls_s.max_row+1):
             for col_in_xls in range(wb_xls_s.min_column, wb_xls_s.max_column+1):
                 # значение ячейки
                 cell_value = wb_xls_s.cell(row_in_xls, col_in_xls).value
+                cell_coord = wb_xls_s.cell(row_in_xls, col_in_xls).coordinate
+                # print(f'{cell_coord} ... {cell_value}')
 
-                # формирование списка спец строк из шапки, которые нужно будет заменить
+                # формирование списка спец-строк из шапки, которые нужно будет заменить
                 if row_in_xls == 1:
                     if col_in_xls != 5:
                         list_replaced_words.append(chars_for_replace.replace('xxx', cell_value))
+                else:
+                    # если последняя колонка, то создаётся объект и заполняется значениями из строки
+                    if col_in_xls == wb_xls_s.max_column:
+                        # создаётся экземпляр
+                        globals()['Recipient' + str(col_in_xls)] = RecipientData(
+                            rd_num = None,
+                            rd_fam = None,
+                            rd_im = None,
+                            rd_otch = None,
+                            rd_email = None,
+                            rd_mno_code = None
+                        )
 
+
+                    # if cell_value in all_strings_html_file:
+                    #     print(f'{cell_coord} ... значение {cell_value = }  есть в HTML файле')
+                    #     print()
+                    # else:
+                    #     pass
+            print()
+            print(RecipientData.count_Recipient)
             # time.sleep(0.1)
 
-        print()
 
 
-        # # сформированные диапазоны обработки
-        # range_xls_file = self.range_all_files + wb_full_s.cell(wb_full_s.max_row, wb_full_s.max_column).coordinate
-        # wb_xls_s_range = wb_full_s[range_full_file]
 
-        # # заполнение list_half_file Неполного файла
-        # for row_in_range_half in wb_half_range:
-        #     # чищу список для временной строки
-        #     list_one_string = []
+
+
+
+
+
+        # def create_anglers():
+        #     # создание экземпляров рыбаков по количеству из table_anglers
+        #     for angler_id, angler_fio in table_anglers.items():
+        #         # создаётся название экземпляра
+        #         string_angler_class = 'Angler' + str(angler_id)
         #
-        #     # прохожу строку
-        #     for cell_in_row_half in row_in_range_half:
-        #         list_one_string.append(cell_in_row_half.value)
-        #
-        #     # все записи из Неполного файла
-        #     list_half_file.append(list_one_string)
+        #         # создаётся экземпляр
+        #         globals()[string_angler_class] = Angler(angler_id,
+        #                                                 angler_fio,
+        #                                                 a_rank=table_anglers_rank[angler_id],
+        #                                                 a_team=table_anglers_teams[angler_id]
+        #                                                 )
+        #         print(f'{globals()["Angler" + str(angler_id)].get_all_info()}')
+
+
+
+
+
 
         # закрываю файл
         wb_xls.close()
