@@ -27,7 +27,6 @@ import openpyxl.utils
 # класс получателя сообщения одной отправки
 class RecipientData:
     """Класс Получателя сообщения"""
-
     count_Recipient = 0
 
     def __init__(self, rd_num=None, rd_fam=None, rd_im=None, rd_otch=None, rd_email=None, rd_mno_code=None):
@@ -40,9 +39,6 @@ class RecipientData:
         self.text_message = None
         self.flag_send_message = False
         RecipientData.count_Recipient += 1
-
-    def get_message_info(self):
-        pass
 
     def get_all_info(self):
         return f'Объект {self.get_recipient_class_name()}, ' \
@@ -340,13 +336,13 @@ class Window(PyQt5.QtWidgets.QMainWindow):
                     # если последняя колонка, то создаётся объект и заполняется значениями из строки
                     if col_in_xls == wb_xls_s.max_column:
                         # создаётся экземпляр
-                        globals()['Recipient' + str(wb_xls_s.cell(row_in_xls, 1).value)] = RecipientData(
-                            rd_num=wb_xls_s.cell(row_in_xls, 1).value,
-                            rd_fam=wb_xls_s.cell(row_in_xls, 2).value,
-                            rd_im=wb_xls_s.cell(row_in_xls, 3).value,
-                            rd_otch=wb_xls_s.cell(row_in_xls, 4).value,
-                            rd_email=wb_xls_s.cell(row_in_xls, 5).value,
-                            rd_mno_code=wb_xls_s.cell(row_in_xls, 6).value)
+                        globals()['Recipient' + str(wb_xls_s.cell(row_in_xls, 1).value)] =\
+                            RecipientData(rd_num=wb_xls_s.cell(row_in_xls, 1).value,
+                                          rd_fam=wb_xls_s.cell(row_in_xls, 2).value,
+                                          rd_im=wb_xls_s.cell(row_in_xls, 3).value,
+                                          rd_otch=wb_xls_s.cell(row_in_xls, 4).value,
+                                          rd_email=wb_xls_s.cell(row_in_xls, 5).value,
+                                          rd_mno_code=wb_xls_s.cell(row_in_xls, 6).value)
 
         for count_obj in range(1, RecipientData.count_Recipient+1):
             print(f'{globals()["Recipient" + str(count_obj)].get_all_info()}')
