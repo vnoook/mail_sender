@@ -330,24 +330,23 @@ class Window(PyQt5.QtWidgets.QMainWindow):
                     if cell_value != 'email':  # если не колонка с почтами
                         list_replaced_words.append(chars_for_replace.replace('xxx', cell_value))
                 else:
+                    # если первая колонка, то создаётся объект, иначе просто заполняются атрибуты из ячеек
                     if col_in_xls == wb_xls_s.min_column:
+                        # создание объекта
                         globals()['Recipient' + str(wb_xls_s.cell(row_in_xls, wb_xls_s.min_column).value)] =\
                             RecipientData(rd_num=wb_xls_s.cell(row_in_xls, wb_xls_s.min_column).value)
+                        # добавление атрибуту text_message текст из HTML файла
+                        globals()['Recipient' + str(wb_xls_s.cell(row_in_xls, wb_xls_s.min_column).value)]. \
+                            __setattr__('text_message', all_strings_html_file)
                     else:
-                        if wb_xls_s.cell(1, col_in_xls).value == 'text_message':
-                            globals()['Recipient' + str(wb_xls_s.cell(row_in_xls, wb_xls_s.min_column).value)].\
-                                __setattr__('text_message', all_strings_html_file)
-                        else:
-                            globals()['Recipient' + str(wb_xls_s.cell(row_in_xls, wb_xls_s.min_column).value)].\
-                                __setattr__(str(wb_xls_s.cell(1, col_in_xls).value), cell_value)
+                        # заполнение атрибутов по названиям колонок в верхней строке
+                        globals()['Recipient' + str(wb_xls_s.cell(row_in_xls, wb_xls_s.min_column).value)].\
+                            __setattr__(str(wb_xls_s.cell(wb_xls_s.min_column, col_in_xls).value), cell_value)
 
-
-
-
-
+                    # /ЭТА РЕАЛИЗАЦИЯ МНЕ НЕ НРАВИТСЯ/
                     # # если последняя колонка, то создаётся объект и заполняется значениями из строки
                     # if col_in_xls == wb_xls_s.max_column:
-                    #     # создаётся экземпляр  /ЭТА РЕАЛИЗАЦИЯ МНЕ НЕ НРАВИТСЯ/
+                    #     # создаётся экземпляр
                     #     globals()['Recipient' + str(wb_xls_s.cell(row_in_xls, 1).value)] =\
                     #         RecipientData(rd_num=wb_xls_s.cell(row_in_xls, 1).value,
                     #                       rd_fam=wb_xls_s.cell(row_in_xls, 2).value,
@@ -355,6 +354,7 @@ class Window(PyQt5.QtWidgets.QMainWindow):
                     #                       rd_otch=wb_xls_s.cell(row_in_xls, 4).value,
                     #                       rd_email=wb_xls_s.cell(row_in_xls, 5).value,
                     #                       rd_mno_code=wb_xls_s.cell(row_in_xls, 6).value)
+                    # /ЭТА РЕАЛИЗАЦИЯ МНЕ НЕ НРАВИТСЯ/
 
         for count_obj in range(1, RecipientData.count_Recipient + 1):
             print(f'{globals()["Recipient" + str(count_obj)].get_all_info()}')
