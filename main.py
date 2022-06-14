@@ -42,25 +42,26 @@ class RecipientData:
 
     def get_all_info(self):
         return f'Объект {self.get_recipient_class_name()}, ' \
-               f'id = {id(self.get_recipient_class_name())}, '\
-               f'{self.num}, '\
-               f'{self.fam}, '\
-               f'{self.im}, '\
-               f'{self.otch}, '\
-               f'{self.email}, '\
-               f'{self.mno_code}, '\
-               f'{self.text_message}, '\
+               f'id = {id(self.get_recipient_class_name())}, ' \
+               f'{self.num}, ' \
+               f'{self.fam}, ' \
+               f'{self.im}, ' \
+               f'{self.otch}, ' \
+               f'{self.email}, ' \
+               f'{self.mno_code}, ' \
+               f'{self.text_message}, ' \
                f'{self.flag_send_message}'
 
     def get_recipient_class_name(self):
-        for k, v in globals().items():
-            if v is self:
-                return k
+        for glob_name, glob_val in globals().items():
+            if glob_val is self:
+                return glob_name
 
 
 # класс главного окна
 class Window(PyQt5.QtWidgets.QMainWindow):
     """Класс главного окна"""
+
     # описание главного окна
     def __init__(self):
         super(Window, self).__init__()
@@ -72,7 +73,6 @@ class Window(PyQt5.QtWidgets.QMainWindow):
 
         self.info_extention_open_file_html = 'Файлы HTML (*.html; *.htm)'
         self.info_extention_open_file_xls = 'Файлы Excel xlsx (*.xlsx)'
-
         self.text_empty_path_file = 'файл пока не выбран'
 
         # количество писем в одном пакете отправки, в штуках
@@ -81,9 +81,6 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         self.q_messages = '3'
         # задержка между отправками пакетов, в секундах
         self.send_delay = '300'  # 5 минут
-
-        # # начало диапазона поиска строк в обоих файлах
-        # self.range_all_files = 'A2:'
 
         # главное окно, надпись на нём и размеры
         self.setWindowTitle('Рассылка почты из XLS файла на основе шаблона HTML')
@@ -321,21 +318,22 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         cell_value, cell_coord = None, None  # инициализировал переменные, а то ИДЭ ругается ))
 
         # получение значений ячеек из XLS файла
-        for row_in_xls in range(wb_xls_s.min_row, wb_xls_s.max_row+1):
-            for col_in_xls in range(wb_xls_s.min_column, wb_xls_s.max_column+1):
-                # значение ячейки
+        for row_in_xls in range(wb_xls_s.min_row, wb_xls_s.max_row + 1):
+            for col_in_xls in range(wb_xls_s.min_column, wb_xls_s.max_column + 1):
+                # значение ячейки и её координаты
                 cell_value = wb_xls_s.cell(row_in_xls, col_in_xls).value
                 cell_coord = wb_xls_s.cell(row_in_xls, col_in_xls).coordinate
                 # print(f'{cell_coord} ... {cell_value}')
 
-                # формирование списка спец-строк из шапки, которые нужно будет заменить
+                # если первая строка, то сформировать список спецстрок из шапки, которые нужно будет искать и заменять
+                # иначе обрабатывается остальные строки с данными
                 if row_in_xls == 1:
-                    if col_in_xls != 5:
+                    if cell_value != 'email':  # если не колонка с почтами
                         list_replaced_words.append(chars_for_replace.replace('xxx', cell_value))
                 else:
                     # если последняя колонка, то создаётся объект и заполняется значениями из строки
                     if col_in_xls == wb_xls_s.max_column:
-                        # создаётся экземпляр
+                        # создаётся экземпляр  /ЭТА РЕАЛИЗАЦИЯ МНЕ НЕ НРАВИТСЯ/
                         globals()['Recipient' + str(wb_xls_s.cell(row_in_xls, 1).value)] =\
                             RecipientData(rd_num=wb_xls_s.cell(row_in_xls, 1).value,
                                           rd_fam=wb_xls_s.cell(row_in_xls, 2).value,
@@ -344,11 +342,8 @@ class Window(PyQt5.QtWidgets.QMainWindow):
                                           rd_email=wb_xls_s.cell(row_in_xls, 5).value,
                                           rd_mno_code=wb_xls_s.cell(row_in_xls, 6).value)
 
-        for count_obj in range(1, RecipientData.count_Recipient+1):
+        for count_obj in range(1, RecipientData.count_Recipient + 1):
             print(f'{globals()["Recipient" + str(count_obj)].get_all_info()}')
-
-
-
 
         # time.sleep(0.1)
 
@@ -365,11 +360,6 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         #                                                 a_team=table_anglers_teams[angler_id]
         #                                                 )
         #         print(f'{globals()["Angler" + str(angler_id)].get_all_info()}')
-
-
-
-
-
 
         # закрываю файл
         wb_xls.close()
