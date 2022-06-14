@@ -23,9 +23,35 @@ import PyQt5.QtGui
 import openpyxl
 import openpyxl.utils
 
+# класс получателя сообщения одной отправки
+class Recipient_data:
+    """Класс Получателя сообщения"""
+
+    count_Recipient = 0
+
+    def __init__(self, rd_number, rd_familia, rd_imya, rd_otchestvo, rd_email, rd_mno_code, rd_text_message):
+        self.number = rd_number
+        self.familia = rd_familia
+        self.imya = rd_imya
+        self.otchestvo = rd_otchestvo
+        self.email = rd_email
+        self.mno_code = rd_mno_code
+        self.text_message = rd_text_message
+        self.flag_send_message = False
+        Recipient_data.count_Recipient += 1
+
+    def get_message_info(self):
+        pass
+
+    def get_Recipient_class_name(self):
+        for k, v in globals().items():
+            if v is self:
+                return k
+
 
 # класс главного окна
 class Window(PyQt5.QtWidgets.QMainWindow):
+    """Класс главного окна"""
     # описание главного окна
     def __init__(self):
         super(Window, self).__init__()
@@ -286,18 +312,13 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         # получение значений ячеек из XLS файла
         for row_in_xls in range(wb_xls_s.min_row, wb_xls_s.max_row+1):
             for col_in_xls in range(wb_xls_s.min_column, wb_xls_s.max_column+1):
+                # значение ячейки
                 cell_value = wb_xls_s.cell(row_in_xls, col_in_xls).value
 
-                # формирование списка спец строк, которые нужно будет заменить
+                # формирование списка спец строк из шапки, которые нужно будет заменить
                 if row_in_xls == 1:
                     if col_in_xls != 5:
                         list_replaced_words.append(chars_for_replace.replace('xxx', cell_value))
-
-                    if col_in_xls == wb_xls_s.max_column:
-                        print(list_replaced_words)
-                else:
-                    pass
-                # print()
 
             # time.sleep(0.1)
 
