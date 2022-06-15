@@ -248,6 +248,7 @@ class Window(PyQt5.QtWidgets.QMainWindow):
 
     # событие - нажатие на кнопку выбора файла
     def select_file(self):
+        data_of_open_file_name = None
         # запоминание старого значения пути выбора файлов
         old_path_of_selected_html_file = self.label_path_html_file.text()
         old_path_of_selected_xls_file = self.label_path_xls_file.text()
@@ -314,14 +315,14 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         # переменные для обработки XLS
         list_replaced_words = []  # список слов для замены в HTML файле
         chars_for_replace = '{{xxx}}'  # шаблон для замены в HTML файле
-        cell_value, cell_coord = None, None  # инициализировал переменные, а то ИДЭ ругается ))
+        # cell_value = None  # инициализировал переменную, а то ИДЭ ругается ))
 
         # получение значений ячеек из XLS файла
         for row_in_xls in range(wb_xls_s.min_row, wb_xls_s.max_row + 1):
             for col_in_xls in range(wb_xls_s.min_column, wb_xls_s.max_column + 1):
                 # значение ячейки и её координаты
                 cell_value = wb_xls_s.cell(row_in_xls, col_in_xls).value
-                cell_coord = wb_xls_s.cell(row_in_xls, col_in_xls).coordinate
+                # cell_coord = wb_xls_s.cell(row_in_xls, col_in_xls).coordinate
                 # print(f'{cell_coord} ... {cell_value}')
 
                 # если первая строка, то сформировать список спецстрок из шапки, которые нужно будет искать и заменять
@@ -343,18 +344,6 @@ class Window(PyQt5.QtWidgets.QMainWindow):
                         globals()['Recipient' + str(wb_xls_s.cell(row_in_xls, wb_xls_s.min_column).value)].\
                             __setattr__(str(wb_xls_s.cell(wb_xls_s.min_column, col_in_xls).value), cell_value)
 
-                    # /ЭТА РЕАЛИЗАЦИЯ МНЕ НЕ НРАВИТСЯ/
-                    # # если последняя колонка, то создаётся объект и заполняется значениями из строки
-                    # if col_in_xls == wb_xls_s.max_column:
-                    #     # создаётся экземпляр
-                    #     globals()['Recipient' + str(wb_xls_s.cell(row_in_xls, 1).value)] =\
-                    #         RecipientData(rd_num=wb_xls_s.cell(row_in_xls, 1).value,
-                    #                       rd_fam=wb_xls_s.cell(row_in_xls, 2).value,
-                    #                       rd_im=wb_xls_s.cell(row_in_xls, 3).value,
-                    #                       rd_otch=wb_xls_s.cell(row_in_xls, 4).value,
-                    #                       rd_email=wb_xls_s.cell(row_in_xls, 5).value,
-                    #                       rd_mno_code=wb_xls_s.cell(row_in_xls, 6).value)
-                    # /ЭТА РЕАЛИЗАЦИЯ МНЕ НЕ НРАВИТСЯ/
 
         for count_obj in range(1, RecipientData.count_Recipient + 1):
             print(f'{globals()["Recipient" + str(count_obj)].get_all_info()}')
