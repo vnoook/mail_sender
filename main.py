@@ -27,6 +27,7 @@ import openpyxl.utils
 # класс получателя сообщения одной отправки
 class RecipientData:
     """Класс Получателя сообщения"""
+
     count_Recipient = 0
 
     def __init__(self, rd_num=None, rd_fam=None, rd_im=None, rd_otch=None, rd_email=None, rd_mno_code=None):
@@ -38,9 +39,11 @@ class RecipientData:
         self.mno_code = rd_mno_code
         self.text_message = None
         self.flag_send_message = False
+
         RecipientData.count_Recipient += 1
 
     def get_all_info(self):
+        # print(*self.__dict__.items())
         return f'Объект {self.get_recipient_class_name()}, ' \
                f'{self.num = }, ' \
                f'{self.fam = }, ' \
@@ -314,7 +317,7 @@ class Window(PyQt5.QtWidgets.QMainWindow):
 
         # переменные для обработки XLS
         list_replaced_words = []  # список слов для замены в HTML файле
-        chars_for_replace = '{{xxx}}'  # шаблон для замены в HTML файле
+        # chars_for_replace = '{{xxx}}'  # шаблон для замены в HTML файле
         # cell_value = None  # инициализировал переменную, а то ИДЭ ругается ))
 
         # получение значений ячеек из XLS файла
@@ -329,7 +332,8 @@ class Window(PyQt5.QtWidgets.QMainWindow):
                 # иначе обрабатывается остальные строки с данными
                 if row_in_xls == 1:
                     if cell_value != 'email':  # если не колонка с почтами
-                        list_replaced_words.append(chars_for_replace.replace('xxx', cell_value))
+                        # list_replaced_words.append(chars_for_replace.replace('xxx', cell_value))
+                        list_replaced_words.append(cell_value)
                 else:
                     # если первая колонка, то создаётся объект, иначе просто заполняются атрибуты из ячеек
                     if col_in_xls == wb_xls_s.min_column:
@@ -344,6 +348,8 @@ class Window(PyQt5.QtWidgets.QMainWindow):
                         globals()['Recipient' + str(wb_xls_s.cell(row_in_xls, wb_xls_s.min_column).value)].\
                             __setattr__(str(wb_xls_s.cell(wb_xls_s.min_column, col_in_xls).value), cell_value)
 
+
+        print(RecipientData.count_Recipient)
 
         for count_obj in range(1, RecipientData.count_Recipient + 1):
             print(f'{globals()["Recipient" + str(count_obj)].get_all_info()}')
