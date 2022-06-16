@@ -348,9 +348,6 @@ class Window(PyQt5.QtWidgets.QMainWindow):
                         globals()['Recipient' + str(wb_xls_s.cell(row_in_xls, wb_xls_s.min_column).value)].\
                             __setattr__(str(wb_xls_s.cell(wb_xls_s.min_column, col_in_xls).value), cell_value)
 
-
-        print(RecipientData.count_Recipient)
-
         for count_obj in range(1, RecipientData.count_Recipient + 1):
             print(f'{globals()["Recipient" + str(count_obj)].get_all_info()}')
 
