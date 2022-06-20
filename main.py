@@ -59,6 +59,21 @@ class RecipientData:
             if glob_val is self:
                 return glob_name
 
+    @staticmethod
+    def replace_text_message(mail_tag, tag_value, mail_text):
+        mail_text = mail_text.replace('{{'+mail_tag+'}}', tag_value)
+        return mail_text
+
+    def __setattr__(self, key, value):
+        # print(f'{key = } ... {value = }')
+        if key in ('num', 'fam', 'im', 'otch', 'mno_code'):
+            pass
+            # print(f'{key = }')
+        else:
+            pass
+            # print(f' ... {key = }')
+        return object.__setattr__(self, key, value)
+
 
 # класс главного окна
 class Window(PyQt5.QtWidgets.QMainWindow):
@@ -349,6 +364,7 @@ class Window(PyQt5.QtWidgets.QMainWindow):
                             __setattr__(str(wb_xls_s.cell(wb_xls_s.min_column, col_in_xls).value), cell_value)
 
         for count_obj in range(1, RecipientData.count_Recipient + 1):
+            pass
             print(f'{globals()["Recipient" + str(count_obj)].get_all_info()}')
 
         # time.sleep(0.1)
