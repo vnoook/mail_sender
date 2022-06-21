@@ -27,6 +27,7 @@ import openpyxl.utils
 class RecipientData:
     """Класс Получателя сообщения"""
 
+    # количество экземпляров класса
     count_Recipient = 0
 
     def __init__(self, rd_text_message=None):
@@ -39,8 +40,10 @@ class RecipientData:
         self.text_message = rd_text_message
         self.flag_send_message = False
 
+        # изменение счётчика экземпляров
         RecipientData.count_Recipient += 1
 
+    # метод получения всех значений аргументов
     def get_all_info(self):
         return f'Объект {self.get_obj_name()}, ' \
                f'{self.num = }, ' \
@@ -52,16 +55,19 @@ class RecipientData:
                f'{self.text_message = }, ' \
                f'{self.flag_send_message = }'
 
+    # метод получения имени экземляра
     def get_obj_name(self):
         for glob_name, glob_val in globals().items():
             if glob_val is self:
                 return glob_name
 
+    # метод замены тэгов на значения
     @staticmethod
     def replace_text_message(mail_tag, tag_value, mail_text):
         mail_text = mail_text.replace('{{'+mail_tag+'}}', tag_value)
         return mail_text
 
+    # переопределение метода для замены тэгов в почтовом сообщении
     def __setattr__(self, key, value):
         if 'Recipient' in str(self.get_obj_name()):
             if key in ('num', 'fam', 'im', 'otch', 'mno_code'):
@@ -353,8 +359,13 @@ class Window(PyQt5.QtWidgets.QMainWindow):
                         globals()['Recipient' + str(wb_xls_s.cell(row_in_xls, wb_xls_s.min_column).value)].\
                             __setattr__(wb_xls_s.cell(wb_xls_s.min_column, col_in_xls).value, cell_value)
 
+
+
+        # временная выдача данных, потом удалить
         for count_obj in range(1, RecipientData.count_Recipient + 1):
             print(f'{globals()["Recipient" + str(count_obj)].get_all_info()}')
+
+
 
         # закрываю файл
         wb_xls.close()
