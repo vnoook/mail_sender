@@ -43,7 +43,6 @@ class RecipientData:
         RecipientData.count_Recipient += 1
 
     def get_all_info(self):
-        # print(*self.__dict__.items())
         return f'Объект {self.get_obj_name()}, ' \
                f'{self.num = }, ' \
                f'{self.fam = }, ' \
@@ -67,17 +66,7 @@ class RecipientData:
     def __setattr__(self, key, value):
         if 'Recipient' in str(self.get_obj_name()):
             if key in ('num', 'fam', 'im', 'otch', 'mno_code'):
-                # print('-' * 50)
-                # print(f'{self.get_obj_name() = } ... {key = } ... {value = }')
-                #
-                # print(f' ... {self.text_message = }')
                 self.text_message = self.replace_text_message(key, value, self.text_message)
-                # print(f' ... {self.text_message = }')
-                #
-                # print()
-            else:
-                pass
-                # print(f' ... {key = }')
         return object.__setattr__(self, key, value)
 
 
@@ -338,22 +327,17 @@ class Window(PyQt5.QtWidgets.QMainWindow):
 
         # переменные для обработки XLS
         list_replaced_words = []  # список слов для замены в HTML файле
-        # chars_for_replace = '{{xxx}}'  # шаблон для замены в HTML файле
-        # cell_value = None  # инициализировал переменную, а то ИДЭ ругается ))
 
         # получение значений ячеек из XLS файла
         for row_in_xls in range(wb_xls_s.min_row, wb_xls_s.max_row + 1):
             for col_in_xls in range(wb_xls_s.min_column, wb_xls_s.max_column + 1):
                 # значение ячейки и её координаты
                 cell_value = wb_xls_s.cell(row_in_xls, col_in_xls).value
-                # cell_coord = wb_xls_s.cell(row_in_xls, col_in_xls).coordinate
-                # print(f'{cell_coord} ... {cell_value}')
 
                 # если первая строка, то сформировать список спецстрок из шапки, которые нужно будет искать и заменять
                 # иначе обрабатывается остальные строки с данными
                 if row_in_xls == 1:
                     if cell_value != 'email':  # если не колонка с почтами
-                        # list_replaced_words.append(chars_for_replace.replace('xxx', cell_value))
                         list_replaced_words.append(cell_value)
                 else:
                     # если первая колонка, то создаётся объект, иначе просто заполняются атрибуты из ячеек
