@@ -1,5 +1,4 @@
 # TODO
-# сделать сбор данных
 # сделать отправку данных
 # сделать кнопку проверки отправки тестового письма
 # сделать прогресс-бар по отправке, считать количество или время?
@@ -31,14 +30,14 @@ class RecipientData:
     count_Recipient = 0
     # class_suffix = 'Recipient'
 
-    def __init__(self, rd_num=None, rd_text_message=None):
-        self.num = rd_num
-        self.text_message = rd_text_message
+    def __init__(self, rd_text_message=None):
+        self.num = None
         self.fam = None
         self.im = None
         self.otch = None
         self.email = None
         self.mno_code = None
+        self.text_message = rd_text_message
         self.flag_send_message = False
 
         RecipientData.count_Recipient += 1
@@ -68,10 +67,14 @@ class RecipientData:
     def __setattr__(self, key, value):
         if 'Recipient' in str(self.get_obj_name()):
             if key in ('num', 'fam', 'im', 'otch', 'mno_code'):
-                print('-' * 50)
-                # print(f'{self.__dict__ = }')
-                print(f'{self.get_obj_name() = } ... {key = } ... {value = }')
-                print()
+                # print('-' * 50)
+                # print(f'{self.get_obj_name() = } ... {key = } ... {value = }')
+                #
+                # print(f' ... {self.text_message = }')
+                self.text_message = self.replace_text_message(key, value, self.text_message)
+                # print(f' ... {self.text_message = }')
+                #
+                # print()
             else:
                 pass
                 # print(f' ... {key = }')
@@ -357,18 +360,13 @@ class Window(PyQt5.QtWidgets.QMainWindow):
                     if col_in_xls == wb_xls_s.min_column:
                         # создание объекта
                         globals()['Recipient' + str(wb_xls_s.cell(row_in_xls, wb_xls_s.min_column).value)] =\
-                            RecipientData(rd_num=wb_xls_s.cell(row_in_xls, wb_xls_s.min_column).value,
-                                          rd_text_message=all_strings_html_file)
+                            RecipientData(rd_text_message=all_strings_html_file)
 
-
-                        # # создание объекта
-                        # globals()['Recipient' + str(wb_xls_s.cell(row_in_xls, wb_xls_s.min_column).value)] =\
-                        #     RecipientData(rd_num=wb_xls_s.cell(row_in_xls, wb_xls_s.min_column).value)
-                        # # добавление атрибуту text_message текст из HTML файла
-                        # globals()['Recipient' + str(wb_xls_s.cell(row_in_xls, wb_xls_s.min_column).value)]. \
-                        #     __setattr__('text_message', all_strings_html_file)
+                        # заполнение первого аргумента
+                        globals()['Recipient' + str(wb_xls_s.cell(row_in_xls, wb_xls_s.min_column).value)].\
+                            __setattr__(wb_xls_s.cell(wb_xls_s.min_column, col_in_xls).value, str(cell_value))
                     else:
-                        # заполнение атрибутов по названиям колонок в верхней строке
+                        # заполнение остальных атрибутов по названиям колонок в верхней строке
                         globals()['Recipient' + str(wb_xls_s.cell(row_in_xls, wb_xls_s.min_column).value)].\
                             __setattr__(wb_xls_s.cell(wb_xls_s.min_column, col_in_xls).value, cell_value)
 
