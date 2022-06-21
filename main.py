@@ -29,22 +29,23 @@ class RecipientData:
     """Класс Получателя сообщения"""
 
     count_Recipient = 0
+    # class_suffix = 'Recipient'
 
-    def __init__(self, rd_num=None, rd_fam=None, rd_im=None, rd_otch=None, rd_email=None, rd_mno_code=None):
+    def __init__(self, rd_num=None, rd_text_message=None):
         self.num = rd_num
-        self.fam = rd_fam
-        self.im = rd_im
-        self.otch = rd_otch
-        self.email = rd_email
-        self.mno_code = rd_mno_code
-        self.text_message = None
+        self.text_message = rd_text_message
+        self.fam = None
+        self.im = None
+        self.otch = None
+        self.email = None
+        self.mno_code = None
         self.flag_send_message = False
 
         RecipientData.count_Recipient += 1
 
     def get_all_info(self):
         # print(*self.__dict__.items())
-        return f'Объект {self.get_recipient_class_name()}, ' \
+        return f'Объект {self.get_obj_name()}, ' \
                f'{self.num = }, ' \
                f'{self.fam = }, ' \
                f'{self.im = }, ' \
@@ -54,7 +55,7 @@ class RecipientData:
                f'{self.text_message = }, ' \
                f'{self.flag_send_message = }'
 
-    def get_recipient_class_name(self):
+    def get_obj_name(self):
         for glob_name, glob_val in globals().items():
             if glob_val is self:
                 return glob_name
@@ -65,13 +66,15 @@ class RecipientData:
         return mail_text
 
     def __setattr__(self, key, value):
-        # print(f'{key = } ... {value = }')
-        if key in ('num', 'fam', 'im', 'otch', 'mno_code'):
-            pass
-            # print(f'{key = }')
-        else:
-            pass
-            # print(f' ... {key = }')
+        if 'Recipient' in str(self.get_obj_name()):
+            if key in ('num', 'fam', 'im', 'otch', 'mno_code'):
+                print('-' * 50)
+                # print(f'{self.__dict__ = }')
+                print(f'{self.get_obj_name() = } ... {key = } ... {value = }')
+                print()
+            else:
+                pass
+                # print(f' ... {key = }')
         return object.__setattr__(self, key, value)
 
 
@@ -354,14 +357,20 @@ class Window(PyQt5.QtWidgets.QMainWindow):
                     if col_in_xls == wb_xls_s.min_column:
                         # создание объекта
                         globals()['Recipient' + str(wb_xls_s.cell(row_in_xls, wb_xls_s.min_column).value)] =\
-                            RecipientData(rd_num=wb_xls_s.cell(row_in_xls, wb_xls_s.min_column).value)
-                        # добавление атрибуту text_message текст из HTML файла
-                        globals()['Recipient' + str(wb_xls_s.cell(row_in_xls, wb_xls_s.min_column).value)]. \
-                            __setattr__('text_message', all_strings_html_file)
+                            RecipientData(rd_num=wb_xls_s.cell(row_in_xls, wb_xls_s.min_column).value,
+                                          rd_text_message=all_strings_html_file)
+
+
+                        # # создание объекта
+                        # globals()['Recipient' + str(wb_xls_s.cell(row_in_xls, wb_xls_s.min_column).value)] =\
+                        #     RecipientData(rd_num=wb_xls_s.cell(row_in_xls, wb_xls_s.min_column).value)
+                        # # добавление атрибуту text_message текст из HTML файла
+                        # globals()['Recipient' + str(wb_xls_s.cell(row_in_xls, wb_xls_s.min_column).value)]. \
+                        #     __setattr__('text_message', all_strings_html_file)
                     else:
                         # заполнение атрибутов по названиям колонок в верхней строке
                         globals()['Recipient' + str(wb_xls_s.cell(row_in_xls, wb_xls_s.min_column).value)].\
-                            __setattr__(str(wb_xls_s.cell(wb_xls_s.min_column, col_in_xls).value), cell_value)
+                            __setattr__(wb_xls_s.cell(wb_xls_s.min_column, col_in_xls).value, cell_value)
 
         for count_obj in range(1, RecipientData.count_Recipient + 1):
             pass
