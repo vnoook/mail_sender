@@ -28,7 +28,6 @@ class RecipientData:
     """Класс Получателя сообщения"""
 
     count_Recipient = 0
-    # class_suffix = 'Recipient'
 
     def __init__(self, rd_text_message=None):
         self.num = None
@@ -357,8 +356,6 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         for count_obj in range(1, RecipientData.count_Recipient + 1):
             pass
             print(f'{globals()["Recipient" + str(count_obj)].get_all_info()}')
-
-        # time.sleep(0.1)
 
         # закрываю файл
         wb_xls.close()
