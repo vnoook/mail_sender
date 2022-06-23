@@ -242,6 +242,17 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         self.pushButton_send_mail.clicked.connect(self.send_mail)
         self.pushButton_send_mail.setToolTip(self.pushButton_send_mail.objectName())
 
+        # SEND_TEST_MAIL
+        # pushButton_send_test_mail
+        self.pushButton_send_test_mail = PyQt5.QtWidgets.QPushButton(self)
+        self.pushButton_send_test_mail.setObjectName('pushButton_send_test_mail')
+        self.pushButton_send_test_mail.setEnabled(False)
+        self.pushButton_send_test_mail.setText('Тестовое письмо')
+        self.pushButton_send_test_mail.setGeometry(PyQt5.QtCore.QRect(200, 310, 300, 25))
+        self.pushButton_send_test_mail.setFixedWidth(130)
+        self.pushButton_send_test_mail.clicked.connect(self.send_mail)
+        self.pushButton_send_test_mail.setToolTip(self.pushButton_send_test_mail.objectName())
+
         # TEXT_STATISTICS
         # label_text_statistics
         self.label_text_statistics = PyQt5.QtWidgets.QLabel(self)
