@@ -94,11 +94,11 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         self.text_empty_path_file = 'файл пока не выбран'
 
         # количество писем в одном пакете отправки, в штуках
-        self.q_pocket = '5'
+        self.q_pocket = 5
         # задержка между письмами в пакете при отправке, в секундах
-        self.q_messages = '3'
+        self.q_messages = 3
         # задержка между отправками пакетов, в секундах
-        self.send_delay = '300'  # 5 минут
+        self.send_delay = 300  # 5 минут
 
         # главное окно, надпись на нём и размеры
         self.setWindowTitle('Рассылка почты из XLS файла на основе шаблона HTML')
@@ -184,7 +184,7 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         # lineEdit_q_pocket
         self.lineEdit_q_pocket = PyQt5.QtWidgets.QLineEdit(self)
         self.lineEdit_q_pocket.setObjectName('lineEdit_q_pocket')
-        self.lineEdit_q_pocket.setText(self.q_pocket)
+        self.lineEdit_q_pocket.setText(str(self.q_pocket))
         self.lineEdit_q_pocket.setGeometry(PyQt5.QtCore.QRect(10, 160, 90, 20))
         # self.lineEdit_q_pocket.setClearButtonEnabled(True)
         self.lineEdit_q_pocket.setEnabled(False)
@@ -205,7 +205,7 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         # lineEdit_q_messages
         self.lineEdit_q_messages = PyQt5.QtWidgets.QLineEdit(self)
         self.lineEdit_q_messages.setObjectName('lineEdit_q_messages')
-        self.lineEdit_q_messages.setText(self.q_messages)
+        self.lineEdit_q_messages.setText(str(self.q_messages))
         self.lineEdit_q_messages.setGeometry(PyQt5.QtCore.QRect(10, 220, 90, 20))
         # self.lineEdit_q_messages.setClearButtonEnabled(True)
         self.lineEdit_q_messages.setEnabled(False)
@@ -226,7 +226,7 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         # lineEdit_mail_delay
         self.lineEdit_mail_delay = PyQt5.QtWidgets.QLineEdit(self)
         self.lineEdit_mail_delay.setObjectName('lineEdit_mail_delay')
-        self.lineEdit_mail_delay.setText(self.send_delay)
+        self.lineEdit_mail_delay.setText(str(self.send_delay))
         self.lineEdit_mail_delay.setGeometry(PyQt5.QtCore.QRect(10, 280, 90, 20))
         # self.lineEdit_q_messages.setClearButtonEnabled(True)
         self.lineEdit_mail_delay.setEnabled(False)
@@ -371,11 +371,43 @@ class Window(PyQt5.QtWidgets.QMainWindow):
                         globals()['Recipient' + str(wb_xls_s.cell(row_in_xls, wb_xls_s.min_column).value)].\
                             __setattr__(wb_xls_s.cell(wb_xls_s.min_column, col_in_xls).value, cell_value)
 
+        # # временная выдача данных, потом удалить
+        # for count_obj in range(1, RecipientData.count_Recipient + 1):
+        #     print(f'{globals()["Recipient" + str(count_obj)].get_all_info()}')
+        # print()
+        # print()
 
 
-        # временная выдача данных, потом удалить
-        for count_obj in range(1, RecipientData.count_Recipient + 1):
-            print(f'{globals()["Recipient" + str(count_obj)].get_all_info()}')
+
+
+
+
+        # участок отправки писем и ожиданий времени
+        list_recipients = [x for x in range(1, RecipientData.count_Recipient + 1)]
+        print(f'{list_recipients = }')
+        print()
+        for recipient in range(0, RecipientData.count_Recipient, self.q_pocket):
+            list_recipients_pocket = list_recipients[recipient : recipient + self.q_pocket]
+            print(f'{list_recipients_pocket = }')
+            for j in list_recipients_pocket:
+                print(f'{j} письмо отправляется')
+
+                if list_recipients_pocket.index(j) != len(list_recipients_pocket) - 1:
+                    print('задержка в секундах между письмами', self.q_messages)
+
+            if len(list_recipients_pocket) == self.q_pocket:
+                if RecipientData.count_Recipient not in list_recipients_pocket:
+                    print()
+                    print('задержка в секундах между пакетами отправки', self.send_delay)
+            print()
+
+
+
+
+
+
+
+
 
 
 
