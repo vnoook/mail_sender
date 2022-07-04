@@ -56,19 +56,19 @@ class RecipientData:
                f'{self.text_message = }, ' \
                f'{self.flag_send_message = }'
 
-    # метод получения имени экземляра
+    # метод получения имени экземпляра
     def get_obj_name(self):
         for glob_name, glob_val in globals().items():
             if glob_val is self:
                 return glob_name
 
-    # метод замены тэгов на значения
+    # метод замены тегов на значения
     @staticmethod
     def replace_text_message(mail_tag, tag_value, mail_text):
         mail_text = mail_text.replace('{{'+mail_tag+'}}', tag_value)
         return mail_text
 
-    # переопределение метода для замены тэгов в почтовом сообщении
+    # переопределение метода для замены тегов в почтовом сообщении
     def __setattr__(self, key, value):
         if 'Recipient' in str(self.get_obj_name()):
             if key in ('num', 'fam', 'im', 'otch', 'mno_code'):
@@ -382,7 +382,7 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         print(f'{list_recipients = }')
         print()
         for recipient in range(0, RecipientData.count_Recipient, self.q_pocket):
-            list_recipients_pocket = list_recipients[recipient : recipient + self.q_pocket]
+            list_recipients_pocket = list_recipients[recipient: recipient + self.q_pocket]
             print(f'{list_recipients_pocket = }')
 
             for j in list_recipients_pocket:
@@ -398,16 +398,6 @@ class Window(PyQt5.QtWidgets.QMainWindow):
                     print('задержка в секундах между пакетами отправки', self.send_delay)
                     # time.sleep(self.send_delay)
             print()
-
-
-
-
-
-
-
-
-
-
 
         # закрываю файл
         wb_xls.close()
