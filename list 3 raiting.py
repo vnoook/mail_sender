@@ -1,4 +1,4 @@
-q_all_letters = 17
+q_all_letters = 23
 q_letter = 5
 mail_delay = 3
 mailpack_delay = 300

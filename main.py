@@ -1,4 +1,5 @@
 # TODO
+# сделать проверку на повторное нажатие на Отправить
 # сделать отправку данных
 # сделать кнопку проверки отправки тестового письма
 # сделать прогресс-бар по отправке, считать количество или время?
@@ -329,7 +330,7 @@ class Window(PyQt5.QtWidgets.QMainWindow):
     # событие - нажатие на кнопку заполнения файла
     def send_mail(self):
         # считаю время "начало"
-        time_start = time.time()
+        time_start = time.monotonic()
 
         # HTML ==---------------------------------
         # открываю файл HTML
@@ -382,7 +383,7 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         wb_xls.close()
 
         # считаю время "конец"
-        time_finish = time.time()
+        time_finish = time.monotonic()
 
         # информационное окно об окончании работы программы
         self.window_info = PyQt5.QtWidgets.QMessageBox()
