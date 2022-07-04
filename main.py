@@ -371,16 +371,11 @@ class Window(PyQt5.QtWidgets.QMainWindow):
                         globals()['Recipient' + str(wb_xls_s.cell(row_in_xls, wb_xls_s.min_column).value)].\
                             __setattr__(wb_xls_s.cell(wb_xls_s.min_column, col_in_xls).value, cell_value)
 
-        # # временная выдача данных, потом удалить
-        # for count_obj in range(1, RecipientData.count_Recipient + 1):
-        #     print(f'{globals()["Recipient" + str(count_obj)].get_all_info()}')
-        # print()
-        # print()
-
-
-
-
-
+        # временная выдача данных, потом удалить
+        for count_obj in range(1, RecipientData.count_Recipient + 1):
+            print(f'{globals()["Recipient" + str(count_obj)].get_all_info()}')
+        print()
+        print()
 
         # участок отправки писем и ожиданий времени
         list_recipients = [x for x in range(1, RecipientData.count_Recipient + 1)]
@@ -389,16 +384,19 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         for recipient in range(0, RecipientData.count_Recipient, self.q_pocket):
             list_recipients_pocket = list_recipients[recipient : recipient + self.q_pocket]
             print(f'{list_recipients_pocket = }')
+
             for j in list_recipients_pocket:
                 print(f'{j} письмо отправляется')
 
                 if list_recipients_pocket.index(j) != len(list_recipients_pocket) - 1:
                     print('задержка в секундах между письмами', self.q_messages)
+                    # time.sleep(self.q_messages)
 
             if len(list_recipients_pocket) == self.q_pocket:
                 if RecipientData.count_Recipient not in list_recipients_pocket:
                     print()
                     print('задержка в секундах между пакетами отправки', self.send_delay)
+                    # time.sleep(self.send_delay)
             print()
 
 
