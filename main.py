@@ -1,7 +1,6 @@
 # TODO
 # сделать проверку на повторное нажатие на Отправить
 # сделать отправку данных
-# сделать кнопку проверки отправки тестового письма
 # сделать прогресс-бар по отправке, считать количество или время?
 
 # ...
@@ -22,6 +21,10 @@ import PyQt5.QtCore
 import PyQt5.QtGui
 import openpyxl
 import openpyxl.utils
+import smtplib
+# from email.mime.text import MIMEText
+import email.mime.text
+import msc
 
 
 # класс получателя сообщения одной отправки
@@ -251,7 +254,7 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         self.pushButton_send_test_mail.setText('Тестовое письмо')
         self.pushButton_send_test_mail.setGeometry(PyQt5.QtCore.QRect(200, 310, 300, 25))
         self.pushButton_send_test_mail.setFixedWidth(130)
-        self.pushButton_send_test_mail.clicked.connect(self.send_mail)
+        self.pushButton_send_test_mail.clicked.connect(self.send_test_mail)
         self.pushButton_send_test_mail.setToolTip(self.pushButton_send_test_mail.objectName())
 
         # TEXT_STATISTICS
@@ -325,7 +328,7 @@ class Window(PyQt5.QtWidgets.QMainWindow):
 
         # активация и деактивация объектов на форме зависящее от "выбраны ли все файлы" и "они разные"
         if self.text_empty_path_file not in (self.label_path_html_file.text(), self.label_path_xls_file.text()):
-            self.pushButton_send_mail.setEnabled(True)
+            # self.pushButton_send_mail.setEnabled(True)
             self.pushButton_send_test_mail.setEnabled(True)
 
     # событие - нажатие на кнопку заполнения файла
@@ -372,15 +375,11 @@ class Window(PyQt5.QtWidgets.QMainWindow):
                         globals()['Recipient' + str(wb_xls_s.cell(row_in_xls, wb_xls_s.min_column).value)].\
                             __setattr__(wb_xls_s.cell(wb_xls_s.min_column, col_in_xls).value, cell_value)
 
-        # TODO
         # временная выдача данных, потом удалить
-        print(f'{RecipientData = } ... {count_Recipient = } ... {RecipientData.count_Recipient = }')
+        print()
         for count_obj in range(1, RecipientData.count_Recipient + 1):
             print(f'{globals()["Recipient" + str(count_obj)].get_all_info()}')
         print()
-        print()
-
-        exit()
 
         # участок отправки писем и ожиданий времени
         list_recipients = [x for x in range(1, RecipientData.count_Recipient + 1)]
@@ -416,6 +415,31 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         self.window_info.setText(f'Файлы закрыты.\n'
                                  f'Отправка писем сделана за {round(time_finish - time_start, 1)} секунд.')
         self.window_info.exec_()
+
+    def send_test_mail(self):
+        # открываю и читаю файл HTML
+        with open(self.label_path_html_file.text(), 'r') as file_html:
+            all_strings_html_file = file_html.read()
+
+        # создание соединения с сервером
+        smtp_link = smtplib.SMTP(msc.msc_mail_server)
+        smtp_link.starttls()
+
+        try:
+            # подключение к аккаунту
+            smtp_link.login(msc.msc_from_address, msc.msc_login_pass)
+            # создание текста письма
+            msg = email.mime.text.MIMEText(all_strings_html_file, "html")
+            msg["From"] = msc.msc_from_address
+            msg["To"] = msc.msc_from_address
+            msg["Subject"] = "Проверка отправки почты HTML письмом!"
+            smtp_link.send_message(msg, msc.msc_from_address, msc.msc_to_address)
+            smtp_link.quit()
+            print("The message was sent successfully!")
+            return "The message was sent successfully!"
+        except Exception as _ex:
+            print(f"{_ex}\nCheck your login or password please!")
+            return f"{_ex}\nCheck your login or password please!"
 
     # событие - нажатие на кнопку Выход
     @staticmethod
