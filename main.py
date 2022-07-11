@@ -326,6 +326,7 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         # активация и деактивация объектов на форме зависящее от "выбраны ли все файлы" и "они разные"
         if self.text_empty_path_file not in (self.label_path_html_file.text(), self.label_path_xls_file.text()):
             self.pushButton_send_mail.setEnabled(True)
+            self.pushButton_send_test_mail.setEnabled(True)
 
     # событие - нажатие на кнопку заполнения файла
     def send_mail(self):
@@ -371,11 +372,15 @@ class Window(PyQt5.QtWidgets.QMainWindow):
                         globals()['Recipient' + str(wb_xls_s.cell(row_in_xls, wb_xls_s.min_column).value)].\
                             __setattr__(wb_xls_s.cell(wb_xls_s.min_column, col_in_xls).value, cell_value)
 
+        # TODO
         # временная выдача данных, потом удалить
+        print(f'{RecipientData = } ... {count_Recipient = } ... {RecipientData.count_Recipient = }')
         for count_obj in range(1, RecipientData.count_Recipient + 1):
             print(f'{globals()["Recipient" + str(count_obj)].get_all_info()}')
         print()
         print()
+
+        exit()
 
         # участок отправки писем и ожиданий времени
         list_recipients = [x for x in range(1, RecipientData.count_Recipient + 1)]
