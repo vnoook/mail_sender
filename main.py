@@ -392,6 +392,26 @@ class Window(PyQt5.QtWidgets.QMainWindow):
             for j in list_recipients_pocket:
                 print(f'{j} письмо отправляется')
 
+                # # создание соединения с сервером
+                # smtp_link = smtplib.SMTP(msc.msc_mail_server)
+                # smtp_link.starttls()
+                #
+                # try:
+                #     # подключение к аккаунту
+                #     smtp_link.login(msc.msc_from_address, msc.msc_login_pass)
+                #     # создание текста письма
+                #     msg = email.mime.text.MIMEText(all_strings_html_file, "html")
+                #     msg["From"] = msc.msc_from_address
+                #     msg["To"] = msc.msc_from_address
+                #     msg["Subject"] = "Проверка отправки почты HTML письмом!"
+                #     smtp_link.send_message(msg, msc.msc_from_address, msc.msc_to_address)
+                #     smtp_link.quit()
+                #     print("The message was sent successfully!")
+                #     return "The message was sent successfully!"
+                # except Exception as _ex:
+                #     print(f"{_ex}\nCheck your login or password please!")
+                #     return f"{_ex}\nCheck your login or password please!"
+
                 if list_recipients_pocket.index(j) != len(list_recipients_pocket) - 1:
                     print('задержка в секундах между письмами', self.q_messages)
                     # time.sleep(self.q_messages)
@@ -429,17 +449,17 @@ class Window(PyQt5.QtWidgets.QMainWindow):
             # подключение к аккаунту
             smtp_link.login(msc.msc_from_address, msc.msc_login_pass)
             # создание текста письма
-            msg = email.mime.text.MIMEText(all_strings_html_file, "html")
-            msg["From"] = msc.msc_from_address
-            msg["To"] = msc.msc_from_address
-            msg["Subject"] = "Проверка отправки почты HTML письмом!"
+            msg = email.mime.text.MIMEText(all_strings_html_file, 'html')
+            msg['From'] = msc.msc_from_address
+            msg['To'] = msc.msc_from_address
+            msg['Subject'] = 'Проверка отправки почты HTML письмом!'
             smtp_link.send_message(msg, msc.msc_from_address, msc.msc_to_address)
             smtp_link.quit()
-            print("The message was sent successfully!")
-            return "The message was sent successfully!"
+            print('Электронное письмо отправлено удачно!')
+            return 'Электронное письмо отправлено удачно!'
         except Exception as _ex:
-            print(f"{_ex}\nCheck your login or password please!")
-            return f"{_ex}\nCheck your login or password please!"
+            print(f'{_ex}\nЭлектронное письмо не отправлено, проверьте логин\пароль!')
+            return f'{_ex}\nЭлектронное письмо не отправлено, проверьте логин\пароль!'
 
     # событие - нажатие на кнопку Выход
     @staticmethod
