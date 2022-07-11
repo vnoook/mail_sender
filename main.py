@@ -12,18 +12,16 @@
 # pyinstaller -F -w main.py
 # ...
 
-# import os
 import sys
 import time
+import smtplib
+import email.mime.text
 import PyQt5
 import PyQt5.QtWidgets
 import PyQt5.QtCore
 import PyQt5.QtGui
 import openpyxl
 import openpyxl.utils
-import smtplib
-# from email.mime.text import MIMEText
-import email.mime.text
 import msc
 
 
@@ -68,7 +66,7 @@ class RecipientData:
     # метод замены тегов на значения
     @staticmethod
     def replace_text_message(mail_tag, tag_value, mail_text):
-        mail_text = mail_text.replace('{{'+mail_tag+'}}', tag_value)
+        mail_text = mail_text.replace('{{' + mail_tag + '}}', tag_value)
         return mail_text
 
     # переопределение метода для замены тегов в почтовом сообщении
@@ -328,7 +326,7 @@ class Window(PyQt5.QtWidgets.QMainWindow):
 
         # активация и деактивация объектов на форме зависящее от "выбраны ли все файлы" и "они разные"
         if self.text_empty_path_file not in (self.label_path_html_file.text(), self.label_path_xls_file.text()):
-            # self.pushButton_send_mail.setEnabled(True)
+            self.pushButton_send_mail.setEnabled(True)
             self.pushButton_send_test_mail.setEnabled(True)
 
     # событие - нажатие на кнопку заполнения файла
@@ -364,15 +362,15 @@ class Window(PyQt5.QtWidgets.QMainWindow):
                     # если первая колонка, то создаётся объект, иначе просто заполняются атрибуты из ячеек
                     if col_in_xls == wb_xls_s.min_column:
                         # создание объекта
-                        globals()['Recipient' + str(wb_xls_s.cell(row_in_xls, wb_xls_s.min_column).value)] =\
+                        globals()['Recipient' + str(wb_xls_s.cell(row_in_xls, wb_xls_s.min_column).value)] = \
                             RecipientData(rd_text_message=all_strings_html_file)
 
                         # заполнение первого аргумента
-                        globals()['Recipient' + str(wb_xls_s.cell(row_in_xls, wb_xls_s.min_column).value)].\
+                        globals()['Recipient' + str(wb_xls_s.cell(row_in_xls, wb_xls_s.min_column).value)]. \
                             __setattr__(wb_xls_s.cell(wb_xls_s.min_column, col_in_xls).value, str(cell_value))
                     else:
                         # заполнение остальных атрибутов по названиям колонок в верхней строке
-                        globals()['Recipient' + str(wb_xls_s.cell(row_in_xls, wb_xls_s.min_column).value)].\
+                        globals()['Recipient' + str(wb_xls_s.cell(row_in_xls, wb_xls_s.min_column).value)]. \
                             __setattr__(wb_xls_s.cell(wb_xls_s.min_column, col_in_xls).value, cell_value)
 
         # временная выдача данных, потом удалить
@@ -458,8 +456,8 @@ class Window(PyQt5.QtWidgets.QMainWindow):
             print('Электронное письмо отправлено удачно!')
             return 'Электронное письмо отправлено удачно!'
         except Exception as _ex:
-            print(f'{_ex}\nЭлектронное письмо не отправлено, проверьте логин\пароль!')
-            return f'{_ex}\nЭлектронное письмо не отправлено, проверьте логин\пароль!'
+            print(f'{_ex}\nЭлектронное письмо не отправлено, проверьте логин-пароль!')
+            return f'{_ex}\nЭлектронное письмо не отправлено, проверьте логин-пароль!'
 
     # событие - нажатие на кнопку Выход
     @staticmethod
