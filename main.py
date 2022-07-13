@@ -48,6 +48,7 @@ class RecipientData:
     # метод получения всех значений аргументов
     def get_all_info(self):
         return f'Объект {self.get_obj_name()}, ' \
+               f'{id(self)}, ' \
                f'{self.num = }, ' \
                f'{self.fam = }, ' \
                f'{self.im = }, ' \
@@ -349,6 +350,8 @@ class Window(PyQt5.QtWidgets.QMainWindow):
 
         # счётчик объектов, с 0 потому что первая строка шапка и там нет обрабатываемых данных
         obj_count = 0
+        # короткое обращение к объекту, утилитарная переменная
+        obj_name = None
 
         # получение значений ячеек из XLS файла
         for row_in_xls in range(1, wb_xls_s.max_row + 1):
@@ -359,6 +362,7 @@ class Window(PyQt5.QtWidgets.QMainWindow):
                 # если первая строка, то сформировать список спецстрок из шапки, которые нужно будет искать и заменять
                 # иначе обрабатывается остальные строки с данными
                 if row_in_xls == 1:
+                    # считываются все, кроме email значения и вносятся для последующей теговой замены
                     if cell_value != 'email':  # если не колонка с почтами
                         list_replaced_words.append(cell_value)
                 else:
@@ -368,32 +372,26 @@ class Window(PyQt5.QtWidgets.QMainWindow):
                         obj_count += 1
 
                         # создание объекта
-                        globals()['Recipient' + str(obj_count)] = \
-                            RecipientData(rd_text_message=all_strings_html_file)
+                        globals()['Recipient' + str(obj_count)] = RecipientData(rd_text_message=all_strings_html_file)
 
                         # короткое обращение к созданному объекту
                         obj_name = globals()['Recipient' + str(obj_count)]
 
                         # заполнение первого аргумента
-                        globals()['Recipient' + str(obj_count)]. \
-                            __setattr__(wb_xls_s.cell(1, col_in_xls).value, str(cell_value))
+                        obj_name.__setattr__(wb_xls_s.cell(1, col_in_xls).value, str(cell_value))
                     else:
                         # заполнение остальных атрибутов по названиям колонок в верхней строке
-                        globals()['Recipient' + str(obj_count)]. \
-                            __setattr__(wb_xls_s.cell(1, col_in_xls).value, cell_value)
+                        obj_name.__setattr__(wb_xls_s.cell(1, col_in_xls).value, cell_value)
         # закрываю файл
         wb_xls.close()
 
-        # временная выдача данных, потом удалить
-        for count_obj in range(1, RecipientData.count_Recipient + 1):
-            print(f'{globals()["Recipient" + str(count_obj)].get_all_info()}')
-        print()
-
-        exit()
+        # # временная выдача данных перед отправкой, потом удалить
+        # for count_obj in range(1, RecipientData.count_Recipient + 1):
+        #     print(f'{globals()["Recipient" + str(count_obj)].get_all_info()}')
+        # print()
 
         # участок отправки писем и ожиданий времени
         list_recipients = [x for x in range(1, RecipientData.count_Recipient + 1)]
-        # print(f'{list_recipients = }')
         print()
         for recipient in range(0, RecipientData.count_Recipient, self.q_pocket):
             list_recipients_pocket = list_recipients[recipient: recipient + self.q_pocket]
@@ -422,8 +420,6 @@ class Window(PyQt5.QtWidgets.QMainWindow):
                 except Exception as _ex:
                     print(f'{_ex}\nЭлектронное письмо не отправлено, проверьте логин-пароль!')
                 print()
-
-
 
                 if list_recipients_pocket.index(recipient_number) != len(list_recipients_pocket) - 1:
                     print('задержка в секундах между письмами', self.q_messages)
