@@ -100,7 +100,7 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         # задержка между письмами в пакете при отправке, в секундах
         self.q_messages = 3
         # задержка между отправками пакетов, в секундах
-        self.send_delay = 5  #  300  # 5 минут
+        self.send_delay = 300  # 5 минут
 
         # главное окно, надпись на нём и размеры
         self.setWindowTitle('Рассылка почты из XLS файла на основе шаблона HTML')
@@ -283,12 +283,12 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         self.checkBox_inviz = PyQt5.QtWidgets.QCheckBox(self)
         self.checkBox_inviz.setObjectName('checkBox_inviz')
         self.checkBox_inviz.setGeometry(PyQt5.QtCore.QRect(10, 500, 190, 40))
-        self.checkBox_inviz.clicked.connect(self.on_off_lineEdits)
+        self.checkBox_inviz.clicked.connect(self.on_off_lineedits)
         self.checkBox_inviz.setText('Хочу редактировать!')
         self.checkBox_inviz.setToolTip(self.checkBox_inviz.objectName())
 
     # событие - скрытие\отображение возможности редактирования полей
-    def on_off_lineEdits(self):
+    def on_off_lineedits(self):
         if self.checkBox_inviz.isChecked():
             self.lineEdit_q_pocket.setEnabled(True)
             self.lineEdit_q_messages.setEnabled(True)
@@ -454,10 +454,10 @@ class Window(PyQt5.QtWidgets.QMainWindow):
                     time.sleep(self.send_delay)
             print()
 
-        # временная выдача данных после отправки, потом удалить!!!!!!!!!!!!!!!!
-        for count_obj in range(1, RecipientData.count_Recipient + 1):
-            print(f'{globals()["Recipient" + str(count_obj)].get_all_info()}')
-        print()
+        # # временная выдача данных после отправки, потом удалить!!!!!!!!!!!!!!!!
+        # for count_obj in range(1, RecipientData.count_Recipient + 1):
+        #     print(f'{globals()["Recipient" + str(count_obj)].get_all_info()}')
+        # print()
 
         # считаю время 'конец'
         time_finish = time.monotonic()
