@@ -1,5 +1,5 @@
 # TODO
-# сделать проверку на повторное нажатие на Отправить
+# сделать проверку на повторное нажатие на Отправить - удалить объекты
 # сделать сопоставление задержек с полями на форме, с их проверкой на числа
 # сделать прогресс-бар по отправке, считать количество или время?
 
@@ -77,6 +77,10 @@ class RecipientData:
                 self.text_message = self.replace_text_message(key, value, self.text_message)
         return object.__setattr__(self, key, value)
 
+    def __del__(self):
+        # изменение счётчика экземпляров
+        RecipientData.count_Recipient -= 1
+        # print('удалился объект', self.get_obj_name(), 'их осталось', RecipientData.count_Recipient)
 
 # класс главного окна
 class Window(PyQt5.QtWidgets.QMainWindow):
@@ -100,7 +104,7 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         # задержка между письмами в пакете при отправке, в секундах
         self.q_messages = 3
         # задержка между отправками пакетов, в секундах
-        self.send_delay = 300  # 5 минут
+        self.send_delay = 4  # 300  # 5 минут
 
         # главное окно, надпись на нём и размеры
         self.setWindowTitle('Рассылка почты из XLS файла на основе шаблона HTML')
@@ -355,6 +359,11 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         # считаю время 'начало'
         time_start = time.monotonic()
 
+        # установка текущих значений переменных ожидания
+        self.q_pocket = int(self.lineEdit_q_pocket.text())
+        self.q_messages = int(self.lineEdit_q_messages.text())
+        self.send_delay = int(self.lineEdit_mail_delay.text())
+
         # HTML ==---------------------------------
         # открываю файл HTML
         with open(self.label_path_html_file.text(), 'r') as file_html:
@@ -410,6 +419,7 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         #     print(f'{globals()["Recipient" + str(count_obj)].get_all_info()}')
         # print()
 
+        print(RecipientData.count_Recipient)
         # участок отправки писем и ожиданий времени
         list_recipients = [x for x in range(1, RecipientData.count_Recipient + 1)]
         print()
@@ -418,32 +428,34 @@ class Window(PyQt5.QtWidgets.QMainWindow):
             # print(f'{list_recipients_pocket = }')
 
             for recipient_number in list_recipients_pocket:
+                # print(f'{recipient_number} письмо отправляется', end=' ... ')
                 print(f'{recipient_number} письмо отправляется')
 
                 # короткое обращение к объекту
                 obj_name = globals()['Recipient' + str(recipient_number)]
 
-                # создание соединения с сервером
-                smtp_link = smtplib.SMTP(msc.msc_mail_server)
-                smtp_link.starttls()
-
-                try:
-                    # подключение к аккаунту
-                    smtp_link.login(msc.msc_from_address, msc.msc_login_pass)
-                    # создание текста письма
-                    msg = email.mime.text.MIMEText(obj_name.text_message, 'html')
-                    msg['From'] = msc.msc_from_address
-                    msg['To'] = obj_name.email
-                    msg['Subject'] = 'Проверка отправки почты HTML письмом!'
-                    smtp_link.send_message(msg, msc.msc_from_address, obj_name.email)
-                    smtp_link.quit()
-                    print('Электронное письмо отправлено удачно!')
-                    obj_name.flag_send_message = True
-                except Exception as _ex:
-                    print(f'{_ex}\nЭлектронное письмо не отправлено, проверьте логин-пароль!')
-                print()
+                # # создание соединения с сервером
+                # smtp_link = smtplib.SMTP(msc.msc_mail_server)
+                # smtp_link.starttls()
+                # try:
+                #     # подключение к аккаунту
+                #     smtp_link.login(msc.msc_from_address, msc.msc_login_pass)
+                #     # создание текста письма
+                #     msg = email.mime.text.MIMEText(obj_name.text_message, 'html')
+                #     msg['From'] = msc.msc_from_address
+                #     msg['To'] = obj_name.email
+                #     msg['Subject'] = 'Проверка отправки почты HTML письмом!'
+                #     smtp_link.send_message(msg, msc.msc_from_address, obj_name.email)
+                #     smtp_link.quit()
+                #     # print('Электронное письмо отправлено удачно!')
+                #     print('OK')
+                #     obj_name.flag_send_message = True
+                # except Exception as _ex:
+                #     print(f'{_ex}\nЭлектронное письмо не отправлено, проверьте логин-пароль!')
+                # print()
 
                 if list_recipients_pocket.index(recipient_number) != len(list_recipients_pocket) - 1:
+                    print()
                     print('задержка в секундах между письмами', self.q_messages)
                     print()
                     time.sleep(self.q_messages)
@@ -458,6 +470,14 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         # for count_obj in range(1, RecipientData.count_Recipient + 1):
         #     print(f'{globals()["Recipient" + str(count_obj)].get_all_info()}')
         # print()
+
+        for count_obj in range(1, RecipientData.count_Recipient + 1):
+            # del globals()["Recipient" + str(count_obj)]
+            globals()["Recipient" + str(count_obj)].__del__()
+        print('удалил все объекты класса Recipient')
+
+
+
 
         # считаю время 'конец'
         time_finish = time.monotonic()
