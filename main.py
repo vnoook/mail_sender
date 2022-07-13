@@ -325,14 +325,14 @@ class Window(PyQt5.QtWidgets.QMainWindow):
                 self.label_path_xls_file.setText(file_name)
                 self.label_path_xls_file.adjustSize()
 
-        # активация и деактивация объектов на форме зависящее от "выбраны ли все файлы" и "они разные"
+        # активация и деактивация объектов на форме зависящее от 'выбраны ли все файлы' и 'они разные'
         if self.text_empty_path_file not in (self.label_path_html_file.text(), self.label_path_xls_file.text()):
             self.pushButton_send_mail.setEnabled(True)
             self.pushButton_send_test_mail.setEnabled(True)
 
     # событие - нажатие на кнопку отправки почты
     def send_mail(self):
-        # считаю время "начало"
+        # считаю время 'начало'
         time_start = time.monotonic()
 
         # HTML ==---------------------------------
@@ -400,6 +400,9 @@ class Window(PyQt5.QtWidgets.QMainWindow):
             for recipient_number in list_recipients_pocket:
                 print(f'{recipient_number} письмо отправляется')
 
+                # короткое обращение к объекту
+                obj_name = globals()['Recipient' + str(recipient_number)]
+
                 # создание соединения с сервером
                 smtp_link = smtplib.SMTP(msc.msc_mail_server)
                 smtp_link.starttls()
@@ -407,14 +410,13 @@ class Window(PyQt5.QtWidgets.QMainWindow):
                 try:
                     # подключение к аккаунту
                     smtp_link.login(msc.msc_from_address, msc.msc_login_pass)
+
                     # создание текста письма
-                    msg = email.mime.text.MIMEText(globals()["Recipient" + str(recipient_number)].text_message, "html")
-                    msg["From"] = msc.msc_from_address
-                    msg["To"] = globals()["Recipient" + str(recipient_number)].email
-                    msg["Subject"] = "Проверка отправки почты HTML письмом!"
-                    smtp_link.send_message(msg,
-                                           msc.msc_from_address,
-                                           globals()["Recipient" + str(recipient_number)].email)
+                    msg = email.mime.text.MIMEText(obj_name.text_message, 'html')
+                    msg['From'] = msc.msc_from_address
+                    msg['To'] = obj_name.email
+                    msg['Subject'] = 'Проверка отправки почты HTML письмом!'
+                    smtp_link.send_message(msg, msc.msc_from_address, obj_name.email)
                     smtp_link.quit()
                     print('Электронное письмо отправлено удачно!')
                 except Exception as _ex:
@@ -432,7 +434,7 @@ class Window(PyQt5.QtWidgets.QMainWindow):
                     time.sleep(self.send_delay)
             print()
 
-        # считаю время "конец"
+        # считаю время 'конец'
         time_finish = time.monotonic()
 
         # информационное окно об окончании работы программы
