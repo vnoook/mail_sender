@@ -347,10 +347,13 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         # переменные для обработки XLS
         list_replaced_words = []  # список слов для замены в HTML файле
 
+        # счётчик объектов, с 0 потому что первая строка шапка и там нет обрабатываемых данных
+        obj_count = 0
+
         # получение значений ячеек из XLS файла
-        for row_in_xls in range(wb_xls_s.min_row, wb_xls_s.max_row + 1):
-            for col_in_xls in range(wb_xls_s.min_column, wb_xls_s.max_column + 1):
-                # значение ячейки и её координаты
+        for row_in_xls in range(1, wb_xls_s.max_row + 1):
+            for col_in_xls in range(1, wb_xls_s.max_column + 1):
+                # значение ячейки
                 cell_value = wb_xls_s.cell(row_in_xls, col_in_xls).value
 
                 # если первая строка, то сформировать список спецстрок из шапки, которые нужно будет искать и заменять
@@ -360,26 +363,33 @@ class Window(PyQt5.QtWidgets.QMainWindow):
                         list_replaced_words.append(cell_value)
                 else:
                     # если первая колонка, то создаётся объект, иначе просто заполняются атрибуты из ячеек
-                    if col_in_xls == wb_xls_s.min_column:
+                    if col_in_xls == 1:
+                        # увеличение итерации счётчика созданных объектов
+                        obj_count += 1
+
                         # создание объекта
-                        globals()['Recipient' + str(wb_xls_s.cell(row_in_xls, wb_xls_s.min_column).value)] = \
+                        globals()['Recipient' + str(obj_count)] = \
                             RecipientData(rd_text_message=all_strings_html_file)
 
+                        # короткое обращение к созданному объекту
+                        obj_name = globals()['Recipient' + str(obj_count)]
+
                         # заполнение первого аргумента
-                        globals()['Recipient' + str(wb_xls_s.cell(row_in_xls, wb_xls_s.min_column).value)]. \
-                            __setattr__(wb_xls_s.cell(wb_xls_s.min_column, col_in_xls).value, str(cell_value))
+                        globals()['Recipient' + str(obj_count)]. \
+                            __setattr__(wb_xls_s.cell(1, col_in_xls).value, str(cell_value))
                     else:
                         # заполнение остальных атрибутов по названиям колонок в верхней строке
-                        globals()['Recipient' + str(wb_xls_s.cell(row_in_xls, wb_xls_s.min_column).value)]. \
-                            __setattr__(wb_xls_s.cell(wb_xls_s.min_column, col_in_xls).value, cell_value)
+                        globals()['Recipient' + str(obj_count)]. \
+                            __setattr__(wb_xls_s.cell(1, col_in_xls).value, cell_value)
         # закрываю файл
         wb_xls.close()
 
-        # # временная выдача данных, потом удалить
-        # print()
-        # for count_obj in range(1, RecipientData.count_Recipient + 1):
-        #     print(f'{globals()["Recipient" + str(count_obj)].get_all_info()}')
-        # print()
+        # временная выдача данных, потом удалить
+        for count_obj in range(1, RecipientData.count_Recipient + 1):
+            print(f'{globals()["Recipient" + str(count_obj)].get_all_info()}')
+        print()
+
+        exit()
 
         # участок отправки писем и ожиданий времени
         list_recipients = [x for x in range(1, RecipientData.count_Recipient + 1)]
