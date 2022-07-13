@@ -100,7 +100,7 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         # задержка между письмами в пакете при отправке, в секундах
         self.q_messages = 3
         # задержка между отправками пакетов, в секундах
-        self.send_delay = 300  # 5 минут
+        self.send_delay = 5  #  300  # 5 минут
 
         # главное окно, надпись на нём и размеры
         self.setWindowTitle('Рассылка почты из XLS файла на основе шаблона HTML')
@@ -188,7 +188,7 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         self.lineEdit_q_pocket.setObjectName('lineEdit_q_pocket')
         self.lineEdit_q_pocket.setText(str(self.q_pocket))
         self.lineEdit_q_pocket.setGeometry(PyQt5.QtCore.QRect(10, 160, 90, 20))
-        # self.lineEdit_q_pocket.setClearButtonEnabled(True)
+        self.lineEdit_q_pocket.setClearButtonEnabled(True)
         self.lineEdit_q_pocket.setEnabled(False)
         self.lineEdit_q_pocket.setToolTip(self.lineEdit_q_pocket.objectName())
 
@@ -209,7 +209,7 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         self.lineEdit_q_messages.setObjectName('lineEdit_q_messages')
         self.lineEdit_q_messages.setText(str(self.q_messages))
         self.lineEdit_q_messages.setGeometry(PyQt5.QtCore.QRect(10, 220, 90, 20))
-        # self.lineEdit_q_messages.setClearButtonEnabled(True)
+        self.lineEdit_q_messages.setClearButtonEnabled(True)
         self.lineEdit_q_messages.setEnabled(False)
         self.lineEdit_q_messages.setToolTip(self.lineEdit_q_pocket.objectName())
 
@@ -230,7 +230,7 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         self.lineEdit_mail_delay.setObjectName('lineEdit_mail_delay')
         self.lineEdit_mail_delay.setText(str(self.send_delay))
         self.lineEdit_mail_delay.setGeometry(PyQt5.QtCore.QRect(10, 280, 90, 20))
-        # self.lineEdit_q_messages.setClearButtonEnabled(True)
+        self.lineEdit_mail_delay.setClearButtonEnabled(True)
         self.lineEdit_mail_delay.setEnabled(False)
         self.lineEdit_mail_delay.setToolTip(self.lineEdit_mail_delay.objectName())
 
@@ -277,6 +277,26 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         self.button_exit.setFixedWidth(50)
         self.button_exit.clicked.connect(self.click_on_btn_exit)
         self.button_exit.setToolTip(self.button_exit.objectName())
+
+        # INVISIBLE
+        # checkBox_inviz
+        self.checkBox_inviz = PyQt5.QtWidgets.QCheckBox(self)
+        self.checkBox_inviz.setObjectName('checkBox_inviz')
+        self.checkBox_inviz.setGeometry(PyQt5.QtCore.QRect(10, 500, 190, 40))
+        self.checkBox_inviz.clicked.connect(self.on_off_lineEdits)
+        self.checkBox_inviz.setText('Хочу редактировать!')
+        self.checkBox_inviz.setToolTip(self.checkBox_inviz.objectName())
+
+    # событие - скрытие\отображение возможности редактирования полей
+    def on_off_lineEdits(self):
+        if self.checkBox_inviz.isChecked():
+            self.lineEdit_q_pocket.setEnabled(True)
+            self.lineEdit_q_messages.setEnabled(True)
+            self.lineEdit_mail_delay.setEnabled(True)
+        else:
+            self.lineEdit_q_pocket.setEnabled(False)
+            self.lineEdit_q_messages.setEnabled(False)
+            self.lineEdit_mail_delay.setEnabled(False)
 
     # событие - нажатие на кнопку выбора файла
     def select_file(self):
@@ -385,7 +405,7 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         # закрываю файл
         wb_xls.close()
 
-        # # временная выдача данных перед отправкой, потом удалить
+        # # временная выдача данных перед отправкой, потом удалить!!!!!!!!!!!!!!!!
         # for count_obj in range(1, RecipientData.count_Recipient + 1):
         #     print(f'{globals()["Recipient" + str(count_obj)].get_all_info()}')
         # print()
@@ -410,7 +430,6 @@ class Window(PyQt5.QtWidgets.QMainWindow):
                 try:
                     # подключение к аккаунту
                     smtp_link.login(msc.msc_from_address, msc.msc_login_pass)
-
                     # создание текста письма
                     msg = email.mime.text.MIMEText(obj_name.text_message, 'html')
                     msg['From'] = msc.msc_from_address
@@ -419,6 +438,7 @@ class Window(PyQt5.QtWidgets.QMainWindow):
                     smtp_link.send_message(msg, msc.msc_from_address, obj_name.email)
                     smtp_link.quit()
                     print('Электронное письмо отправлено удачно!')
+                    obj_name.flag_send_message = True
                 except Exception as _ex:
                     print(f'{_ex}\nЭлектронное письмо не отправлено, проверьте логин-пароль!')
                 print()
@@ -433,6 +453,11 @@ class Window(PyQt5.QtWidgets.QMainWindow):
                     print('задержка в секундах между пакетами отправки', self.send_delay)
                     time.sleep(self.send_delay)
             print()
+
+        # временная выдача данных после отправки, потом удалить!!!!!!!!!!!!!!!!
+        for count_obj in range(1, RecipientData.count_Recipient + 1):
+            print(f'{globals()["Recipient" + str(count_obj)].get_all_info()}')
+        print()
 
         # считаю время 'конец'
         time_finish = time.monotonic()
