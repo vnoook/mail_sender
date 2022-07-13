@@ -77,10 +77,11 @@ class RecipientData:
                 self.text_message = self.replace_text_message(key, value, self.text_message)
         return object.__setattr__(self, key, value)
 
-    def __del__(self):
-        # изменение счётчика экземпляров
-        RecipientData.count_Recipient -= 1
-        # print('удалился объект', self.get_obj_name(), 'их осталось', RecipientData.count_Recipient)
+    # def __del__(self):
+    #     # изменение счётчика экземпляров
+    #     RecipientData.count_Recipient -= 1
+    #     # print('удалился объект', self.get_obj_name(), 'их осталось', RecipientData.count_Recipient)
+
 
 # класс главного окна
 class Window(PyQt5.QtWidgets.QMainWindow):
@@ -102,9 +103,9 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         # количество писем в одном пакете отправки, в штуках
         self.q_pocket = 5
         # задержка между письмами в пакете при отправке, в секундах
-        self.q_messages = 3
+        self.q_messages = 1  # 3
         # задержка между отправками пакетов, в секундах
-        self.send_delay = 4  # 300  # 5 минут
+        self.send_delay = 1  # 300  # 5 минут
 
         # главное окно, надпись на нём и размеры
         self.setWindowTitle('Рассылка почты из XLS файла на основе шаблона HTML')
@@ -411,13 +412,13 @@ class Window(PyQt5.QtWidgets.QMainWindow):
                     else:
                         # заполнение остальных атрибутов по названиям колонок в верхней строке
                         obj_name.__setattr__(wb_xls_s.cell(1, col_in_xls).value, cell_value)
-        # закрываю файл
-        wb_xls.close()
+
 
         # # временная выдача данных перед отправкой, потом удалить!!!!!!!!!!!!!!!!
         # for count_obj in range(1, RecipientData.count_Recipient + 1):
         #     print(f'{globals()["Recipient" + str(count_obj)].get_all_info()}')
         # print()
+
 
         print(RecipientData.count_Recipient)
         # участок отправки писем и ожиданий времени
@@ -462,22 +463,30 @@ class Window(PyQt5.QtWidgets.QMainWindow):
 
             if len(list_recipients_pocket) == self.q_pocket:
                 if RecipientData.count_Recipient not in list_recipients_pocket:
+                    print()
                     print('задержка в секундах между пакетами отправки', self.send_delay)
                     time.sleep(self.send_delay)
             print()
-
         # # временная выдача данных после отправки, потом удалить!!!!!!!!!!!!!!!!
         # for count_obj in range(1, RecipientData.count_Recipient + 1):
         #     print(f'{globals()["Recipient" + str(count_obj)].get_all_info()}')
         # print()
 
-        for count_obj in range(1, RecipientData.count_Recipient + 1):
-            # del globals()["Recipient" + str(count_obj)]
-            globals()["Recipient" + str(count_obj)].__del__()
-        print('удалил все объекты класса Recipient')
+        RecipientData.count_Recipient = 0
 
 
 
+
+        # for count_obj in range(1, RecipientData.count_Recipient + 1):
+        #     # del globals()["Recipient" + str(count_obj)]
+        #     globals()["Recipient" + str(count_obj)].__del__()
+        # print('удалил все объекты класса Recipient')
+
+
+
+
+        # закрываю файл
+        wb_xls.close()
 
         # считаю время 'конец'
         time_finish = time.monotonic()
