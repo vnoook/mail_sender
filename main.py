@@ -1,7 +1,9 @@
 # TODO
-# сделать проверку на повторное нажатие на Отправить - удалить объекты
 # сделать сопоставление задержек с полями на форме, с их проверкой на числа
 # сделать прогресс-бар по отправке, считать количество или время?
+# сделать проверку на отправленность и предложить повторную отправку неотправленных писем
+# сделать функцию отправки сообщения, в тестовом и в обычном месте кода
+# дописать функцию check_is_digit
 
 # ...
 # INSTALL
@@ -76,11 +78,6 @@ class RecipientData:
             if key in ('num', 'fam', 'im', 'otch', 'mno_code'):
                 self.text_message = self.replace_text_message(key, value, self.text_message)
         return object.__setattr__(self, key, value)
-
-    # def __del__(self):
-    #     # изменение счётчика экземпляров
-    #     RecipientData.count_Recipient -= 1
-    #     # print('удалился объект', self.get_obj_name(), 'их осталось', RecipientData.count_Recipient)
 
 
 # класс главного окна
@@ -287,7 +284,7 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         # checkBox_inviz
         self.checkBox_inviz = PyQt5.QtWidgets.QCheckBox(self)
         self.checkBox_inviz.setObjectName('checkBox_inviz')
-        self.checkBox_inviz.setGeometry(PyQt5.QtCore.QRect(10, 500, 190, 40))
+        self.checkBox_inviz.setGeometry(PyQt5.QtCore.QRect(300, 410, 190, 40))
         self.checkBox_inviz.clicked.connect(self.on_off_lineedits)
         self.checkBox_inviz.setText('Хочу редактировать!')
         self.checkBox_inviz.setToolTip(self.checkBox_inviz.objectName())
@@ -365,12 +362,10 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         self.q_messages = int(self.lineEdit_q_messages.text())
         self.send_delay = int(self.lineEdit_mail_delay.text())
 
-        # HTML ==---------------------------------
         # открываю файл HTML
         with open(self.label_path_html_file.text(), 'r') as file_html:
             all_strings_html_file = file_html.read()
 
-        # XLS ==---------------------------------
         # открываю файл XLS и выбираю активный лист
         wb_xls = openpyxl.load_workbook(self.label_path_xls_file.text())
         wb_xls_s = wb_xls.active
@@ -413,77 +408,63 @@ class Window(PyQt5.QtWidgets.QMainWindow):
                         # заполнение остальных атрибутов по названиям колонок в верхней строке
                         obj_name.__setattr__(wb_xls_s.cell(1, col_in_xls).value, cell_value)
 
-
         # # временная выдача данных перед отправкой, потом удалить!!!!!!!!!!!!!!!!
         # for count_obj in range(1, RecipientData.count_Recipient + 1):
         #     print(f'{globals()["Recipient" + str(count_obj)].get_all_info()}')
         # print()
 
-
-        print(RecipientData.count_Recipient)
         # участок отправки писем и ожиданий времени
         list_recipients = [x for x in range(1, RecipientData.count_Recipient + 1)]
         print()
         for recipient in range(0, RecipientData.count_Recipient, self.q_pocket):
             list_recipients_pocket = list_recipients[recipient: recipient + self.q_pocket]
-            # print(f'{list_recipients_pocket = }')
 
             for recipient_number in list_recipients_pocket:
-                # print(f'{recipient_number} письмо отправляется', end=' ... ')
-                print(f'{recipient_number} письмо отправляется')
-
                 # короткое обращение к объекту
                 obj_name = globals()['Recipient' + str(recipient_number)]
 
-                # # создание соединения с сервером
-                # smtp_link = smtplib.SMTP(msc.msc_mail_server)
-                # smtp_link.starttls()
-                # try:
-                #     # подключение к аккаунту
-                #     smtp_link.login(msc.msc_from_address, msc.msc_login_pass)
-                #     # создание текста письма
-                #     msg = email.mime.text.MIMEText(obj_name.text_message, 'html')
-                #     msg['From'] = msc.msc_from_address
-                #     msg['To'] = obj_name.email
-                #     msg['Subject'] = 'Проверка отправки почты HTML письмом!'
-                #     smtp_link.send_message(msg, msc.msc_from_address, obj_name.email)
-                #     smtp_link.quit()
-                #     # print('Электронное письмо отправлено удачно!')
-                #     print('OK')
-                #     obj_name.flag_send_message = True
-                # except Exception as _ex:
-                #     print(f'{_ex}\nЭлектронное письмо не отправлено, проверьте логин-пароль!')
-                # print()
+                # создание текста письма
+                msg = email.mime.text.MIMEText(obj_name.text_message, 'html')
+                msg['From'] = msc.msc_from_address
+                msg['To'] = obj_name.email
+                msg['Subject'] = 'Проверка отправки почты HTML письмом!'
+
+                try:
+                    print(f'{recipient_number} письмо отправляется', end=' ... ')
+                    # создание соединения с сервером
+                    smtp_link = smtplib.SMTP(msc.msc_mail_server)
+                    smtp_link.starttls()
+                    # подключение к аккаунту
+                    smtp_link.login(msc.msc_from_address, msc.msc_login_pass)
+                    smtp_link.send_message(msg, msc.msc_from_address, obj_name.email)
+                    smtp_link.quit()
+                    obj_name.flag_send_message = True
+                    print('OK')
+                except Exception as _ex:
+                    print(f' FAIL error {_ex}')
+
+                print()
 
                 if list_recipients_pocket.index(recipient_number) != len(list_recipients_pocket) - 1:
-                    print()
                     print('задержка в секундах между письмами', self.q_messages)
                     print()
                     time.sleep(self.q_messages)
 
             if len(list_recipients_pocket) == self.q_pocket:
                 if RecipientData.count_Recipient not in list_recipients_pocket:
-                    print()
                     print('задержка в секундах между пакетами отправки', self.send_delay)
+                    print()
                     time.sleep(self.send_delay)
-            print()
+
+        print(f' -=- Отправка окончена -=- ')
+
         # # временная выдача данных после отправки, потом удалить!!!!!!!!!!!!!!!!
         # for count_obj in range(1, RecipientData.count_Recipient + 1):
         #     print(f'{globals()["Recipient" + str(count_obj)].get_all_info()}')
         # print()
 
+        # обнуление счётчика количества объектов для возможности повторной отправки рассылки
         RecipientData.count_Recipient = 0
-
-
-
-
-        # for count_obj in range(1, RecipientData.count_Recipient + 1):
-        #     # del globals()["Recipient" + str(count_obj)]
-        #     globals()["Recipient" + str(count_obj)].__del__()
-        # print('удалил все объекты класса Recipient')
-
-
-
 
         # закрываю файл
         wb_xls.close()
