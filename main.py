@@ -242,7 +242,7 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         self.pushButton_send_mail.setObjectName('pushButton_send_mail')
         self.pushButton_send_mail.setEnabled(False)
         self.pushButton_send_mail.setText('Отправьте почту')
-        self.pushButton_send_mail.setGeometry(PyQt5.QtCore.QRect(10, 310, 180, 25))
+        self.pushButton_send_mail.setGeometry(PyQt5.QtCore.QRect(10, 320, 180, 25))
         self.pushButton_send_mail.setFixedWidth(130)
         self.pushButton_send_mail.clicked.connect(self.send_mail)
         self.pushButton_send_mail.setToolTip(self.pushButton_send_mail.objectName())
@@ -253,22 +253,25 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         self.pushButton_send_test_mail.setObjectName('pushButton_send_test_mail')
         self.pushButton_send_test_mail.setEnabled(False)
         self.pushButton_send_test_mail.setText('Тестовое письмо')
-        self.pushButton_send_test_mail.setGeometry(PyQt5.QtCore.QRect(200, 310, 300, 25))
+        self.pushButton_send_test_mail.setGeometry(PyQt5.QtCore.QRect(200, 320, 300, 25))
         self.pushButton_send_test_mail.setFixedWidth(130)
         self.pushButton_send_test_mail.clicked.connect(self.send_test_mail)
         self.pushButton_send_test_mail.setToolTip(self.pushButton_send_test_mail.objectName())
 
-        # TEXT_STATISTICS
-        # label_text_statistics
-        self.label_text_statistics = PyQt5.QtWidgets.QLabel(self)
-        self.label_text_statistics.setObjectName('label_text_statistics')
-        self.label_text_statistics.setText('Статистика отправки:\n')
-        self.label_text_statistics.setGeometry(PyQt5.QtCore.QRect(10, 340, 150, 40))
-        font = PyQt5.QtGui.QFont()
-        font.setPointSize(12)
-        self.label_text_statistics.setFont(font)
-        self.label_text_statistics.adjustSize()
-        self.label_text_statistics.setToolTip(self.label_text_statistics.objectName())
+        # STATISTICS
+        # progressBarStat
+        self.progressBarStat = PyQt5.QtWidgets.QProgressBar(self)
+        self.progressBarStat.setObjectName('progressBarStat')
+        self.progressBarStat.setGeometry(PyQt5.QtCore.QRect(10, 360, 320, 25))
+        # self.progressBarStat.setText('Статистика отправки:\n')
+        self.progressBarStat.setValue(0)
+        self.progressBarStat.setMinimum(0)
+        self.progressBarStat.setMaximum(100)
+        self.progressBarStat.setRange(0, 100)
+        # self.progressBarStat.
+        # self.progressBarStat.
+        # self.progressBarStat.
+        self.progressBarStat.setToolTip(self.progressBarStat.objectName())
 
         # EXIT
         # button_exit
@@ -440,6 +443,9 @@ class Window(PyQt5.QtWidgets.QMainWindow):
                     smtp_link.quit()
                     obj_name.flag_send_message = True
                     print('OK')
+
+                    self.progressBarStat.setValue(recipient_number)
+
                 except Exception as _ex:
                     print(f' FAIL error {_ex}')
 
