@@ -100,9 +100,9 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         # количество писем в одном пакете отправки, в штуках
         self.q_pocket = 5
         # задержка между письмами в пакете при отправке, в секундах
-        self.q_messages = 1  # 3
+        self.q_messages = 2  # 3
         # задержка между отправками пакетов, в секундах
-        self.send_delay = 1  # 300  # 5 минут
+        self.send_delay = 3  # 300  # 5 минут
 
         # главное окно, надпись на нём и размеры
         self.setWindowTitle('Рассылка почты из XLS файла на основе шаблона HTML')
@@ -263,14 +263,9 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         self.progressBarStat = PyQt5.QtWidgets.QProgressBar(self)
         self.progressBarStat.setObjectName('progressBarStat')
         self.progressBarStat.setGeometry(PyQt5.QtCore.QRect(10, 360, 320, 25))
-        # self.progressBarStat.setText('Статистика отправки:\n')
-        self.progressBarStat.setValue(0)
         self.progressBarStat.setMinimum(0)
         self.progressBarStat.setMaximum(100)
-        self.progressBarStat.setRange(0, 100)
-        # self.progressBarStat.
-        # self.progressBarStat.
-        # self.progressBarStat.
+        self.progressBarStat.setValue(0)
         self.progressBarStat.setToolTip(self.progressBarStat.objectName())
 
         # EXIT
@@ -416,6 +411,10 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         #     print(f'{globals()["Recipient" + str(count_obj)].get_all_info()}')
         # print()
 
+        # настройка прогресс-бара
+        self.progressBarStat.setMaximum(RecipientData.count_Recipient)
+        self.progressBarStat.setValue(0)
+
         # участок отправки писем и ожиданий времени
         list_recipients = [x for x in range(1, RecipientData.count_Recipient + 1)]
         print()
@@ -444,10 +443,11 @@ class Window(PyQt5.QtWidgets.QMainWindow):
                     obj_name.flag_send_message = True
                     print('OK')
 
-                    self.progressBarStat.setValue(recipient_number)
-
                 except Exception as _ex:
-                    print(f' FAIL error {_ex}')
+                    print(f' FAIL error - {_ex}')
+
+                # изменения прогресс-бара
+                self.progressBarStat.setValue(recipient_number)
 
                 print()
 
