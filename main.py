@@ -100,13 +100,13 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         # количество писем в одном пакете отправки, в штуках
         self.q_pocket = 5
         # задержка между письмами в пакете при отправке, в секундах
-        self.q_messages = 2  # 3
+        self.q_messages = 3
         # задержка между отправками пакетов, в секундах
-        self.send_delay = 3  # 300  # 5 минут
+        self.send_delay = 300  # 5 минут
 
         # главное окно, надпись на нём и размеры
         self.setWindowTitle('Рассылка почты из XLS файла на основе шаблона HTML')
-        self.setGeometry(600, 200, 700, 450)
+        self.setGeometry(200, 200, 700, 450)
 
         # ОБЪЕКТЫ НА ФОРМЕ
         # HTML
@@ -282,7 +282,7 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         # checkBox_inviz
         self.checkBox_inviz = PyQt5.QtWidgets.QCheckBox(self)
         self.checkBox_inviz.setObjectName('checkBox_inviz')
-        self.checkBox_inviz.setGeometry(PyQt5.QtCore.QRect(300, 410, 190, 40))
+        self.checkBox_inviz.setGeometry(PyQt5.QtCore.QRect(10, 450, 190, 40))
         self.checkBox_inviz.clicked.connect(self.on_off_lineedits)
         self.checkBox_inviz.setText('Хочу редактировать!')
         self.checkBox_inviz.setToolTip(self.checkBox_inviz.objectName())
@@ -417,7 +417,7 @@ class Window(PyQt5.QtWidgets.QMainWindow):
 
         # участок отправки писем и ожиданий времени
         list_recipients = [x for x in range(1, RecipientData.count_Recipient + 1)]
-        print()
+        # print()
         for recipient in range(0, RecipientData.count_Recipient, self.q_pocket):
             list_recipients_pocket = list_recipients[recipient: recipient + self.q_pocket]
 
@@ -432,7 +432,7 @@ class Window(PyQt5.QtWidgets.QMainWindow):
                 msg['Subject'] = 'Проверка отправки почты HTML письмом!'
 
                 try:
-                    print(f'{recipient_number} письмо отправляется', end=' ... ')
+                    # print(f'{recipient_number} письмо отправляется', end=' ... ')
                     # создание соединения с сервером
                     smtp_link = smtplib.SMTP(msc.msc_mail_server)
                     smtp_link.starttls()
@@ -441,28 +441,34 @@ class Window(PyQt5.QtWidgets.QMainWindow):
                     smtp_link.send_message(msg, msc.msc_from_address, obj_name.email)
                     smtp_link.quit()
                     obj_name.flag_send_message = True
-                    print('OK')
+                    # print('OK')
 
                 except Exception as _ex:
-                    print(f' FAIL error - {_ex}')
+                    # print(f' FAIL error - {_ex}')
+
+                    # информационное окно об ошибке при отправке сообщения
+                    self.window_info = PyQt5.QtWidgets.QMessageBox()
+                    self.window_info.setWindowTitle('Ошибка')
+                    self.window_info.setText(f'Ошибка при отправке.\n{_ex}')
+                    self.window_info.exec_()
 
                 # изменения прогресс-бара
                 self.progressBarStat.setValue(recipient_number)
 
-                print()
+                # print()
 
                 if list_recipients_pocket.index(recipient_number) != len(list_recipients_pocket) - 1:
-                    print('задержка в секундах между письмами', self.q_messages)
-                    print()
+                    # print('задержка в секундах между письмами', self.q_messages)
+                    # print()
                     time.sleep(self.q_messages)
 
             if len(list_recipients_pocket) == self.q_pocket:
                 if RecipientData.count_Recipient not in list_recipients_pocket:
-                    print('задержка в секундах между пакетами отправки', self.send_delay)
-                    print()
+                    # print('задержка в секундах между пакетами отправки', self.send_delay)
+                    # print()
                     time.sleep(self.send_delay)
 
-        print(f' -=- Отправка окончена -=- ')
+        # print(f' -=- Отправка окончена -=- ')
 
         # # временная выдача данных после отправки, потом удалить!!!!!!!!!!!!!!!!
         # for count_obj in range(1, RecipientData.count_Recipient + 1):
@@ -505,10 +511,24 @@ class Window(PyQt5.QtWidgets.QMainWindow):
             msg['Subject'] = msc.msc_subject_text
             smtp_link.send_message(msg, msc.msc_from_address, msc.msc_test_address)
             smtp_link.quit()
-            print('Электронное письмо отправлено удачно!')
+            # print('Электронное письмо отправлено удачно!')
+
+            # информационное окно об удачной отправке тестового письма
+            self.window_info = PyQt5.QtWidgets.QMessageBox()
+            self.window_info.setWindowTitle('Отправлено')
+            self.window_info.setText(f'Тестовое письмо отправлено на почту {msc.msc_test_address}.')
+            self.window_info.exec_()
+
             return 'Электронное письмо отправлено удачно!'
         except Exception as _ex:
-            print(f'{_ex}\nЭлектронное письмо не отправлено, проверьте логин-пароль!')
+            # print(f'{_ex}\nЭлектронное письмо не отправлено, проверьте логин-пароль!')
+
+            # информационное окно об ошибке при отправке сообщения
+            self.window_info = PyQt5.QtWidgets.QMessageBox()
+            self.window_info.setWindowTitle('Ошибка')
+            self.window_info.setText(f'Ошибка при отправке.\n{_ex}')
+            self.window_info.exec_()
+
             return f'{_ex}\nЭлектронное письмо не отправлено, проверьте логин-пароль!'
 
     # событие - нажатие на кнопку Выход
