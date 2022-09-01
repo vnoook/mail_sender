@@ -213,7 +213,7 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         self.lineEdit_q_messages.setGeometry(PyQt5.QtCore.QRect(10, 220, 90, 20))
         self.lineEdit_q_messages.setClearButtonEnabled(True)
         self.lineEdit_q_messages.setEnabled(False)
-        self.lineEdit_q_messages.setToolTip(self.lineEdit_q_pocket.objectName())
+        self.lineEdit_q_messages.setToolTip(self.lineEdit_q_messages.objectName())
 
         # MAIL_DELAY
         # label_mail_delay
@@ -535,6 +535,18 @@ class Window(PyQt5.QtWidgets.QMainWindow):
 
             return f'{_ex}\nЭлектронное письмо не отправлено, проверьте логин-пароль!'
 
+    def activate_obj_on_form(self, action_todo):
+        pass
+        if action_todo == 1:
+            # self.
+            # self.
+            # self.
+            # self.
+            # self.
+            # self.
+            self.lineEdit_mail_delay.setEnabled(False)
+            pass
+
     # функция расчёта примерного времени
     @staticmethod
     def time_count(letters_all=16, letters_pack=5, delay_letter=3, delay_pack=300):
@@ -561,6 +573,8 @@ class Window(PyQt5.QtWidgets.QMainWindow):
     # проверка строка на числовое значение - взять число из поля или взять значение по умолчанию
     @staticmethod
     def check_is_digit(data_in):
+        # TODO
+        # тут дописать функцию, описание вверху
         return data_in
 
 
