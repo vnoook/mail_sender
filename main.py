@@ -352,6 +352,8 @@ class Window(PyQt5.QtWidgets.QMainWindow):
 
     # событие - нажатие на кнопку отправки почты
     def send_mail(self):
+        self.activate_obj_on_form(0)
+
         # считаю время 'начало'
         time_start = time.monotonic()
 
@@ -495,6 +497,8 @@ class Window(PyQt5.QtWidgets.QMainWindow):
                                  f'Отправка писем сделана за {round(time_finish - time_start, 1)} секунд.')
         self.window_info.exec_()
 
+        self.activate_obj_on_form(1)
+
     # событие - нажатие на кнопку отправки тестового письма
     def send_test_mail(self):
         # открываю и читаю файл HTML
@@ -536,16 +540,24 @@ class Window(PyQt5.QtWidgets.QMainWindow):
             return f'{_ex}\nЭлектронное письмо не отправлено, проверьте логин-пароль!'
 
     def activate_obj_on_form(self, action_todo):
-        pass
-        if action_todo == 1:
-            # self.
-            # self.
-            # self.
-            # self.
-            # self.
-            # self.
+        if action_todo == 0:
+            self.toolButton_select_html_file.setEnabled(False)
+            self.toolButton_select_xls_file.setEnabled(False)
+            self.lineEdit_q_pocket.setEnabled(False)
+            self.lineEdit_q_messages.setEnabled(False)
             self.lineEdit_mail_delay.setEnabled(False)
-            pass
+            self.pushButton_send_test_mail.setEnabled(False)
+            self.checkBox_inviz.setEnabled(False)
+            self.pushButton_send_mail.setText('Остановить отправку')
+        elif action_todo == 1:
+            self.toolButton_select_html_file.setEnabled(True)
+            self.toolButton_select_xls_file.setEnabled(True)
+            self.lineEdit_q_pocket.setEnabled(True)
+            self.lineEdit_q_messages.setEnabled(True)
+            self.lineEdit_mail_delay.setEnabled(True)
+            self.pushButton_send_test_mail.setEnabled(True)
+            self.checkBox_inviz.setEnabled(True)
+            self.pushButton_send_mail.setText('Отправьте почту')
 
     # функция расчёта примерного времени
     @staticmethod
