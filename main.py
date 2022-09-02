@@ -4,6 +4,8 @@
 # сделать проверку на отправленность и предложить повторную отправку неотправленных писем
 # сделать функцию отправки сообщения, в тестовом и в обычном месте кода
 # дописать функцию check_is_digit
+# заменить несколько функций с вкл-выкл объектов на форме на одну универсальную
+# заменить создание объектов на создание в словаре
 
 # ...
 # INSTALL
@@ -80,6 +82,20 @@ class RecipientData:
         return object.__setattr__(self, key, value)
 
 
+# класс для отправки почты в отдельном потоке
+class Worker:
+    """Класс для отправки почты в отдельном потоке"""
+    finishSignal = PyQt5.QtCore.pyqtSignal(int)
+
+    def __init__(self):
+        super(Worker, self).__init__()
+
+    def start(self):
+        # тут вставка кода для отправки
+        self.finishSignal.emit(recipient_number) ?????????
+        pass
+
+
 # класс главного окна
 class Window(PyQt5.QtWidgets.QMainWindow):
     """Класс главного окна"""
@@ -87,6 +103,10 @@ class Window(PyQt5.QtWidgets.QMainWindow):
     # описание главного окна
     def __init__(self):
         super(Window, self).__init__()
+
+        # переменные для создания потока
+        self.objQtThread = None
+        self.thread = None
 
         # переменные, атрибуты
         self.window_info = None
@@ -298,6 +318,27 @@ class Window(PyQt5.QtWidgets.QMainWindow):
             self.lineEdit_q_messages.setEnabled(False)
             self.lineEdit_mail_delay.setEnabled(False)
 
+    # событие - скрытие\отображение возможности редактирования полей
+    def activate_obj_on_form(self, action_todo):
+        if action_todo == 0:
+            self.toolButton_select_html_file.setEnabled(False)
+            self.toolButton_select_xls_file.setEnabled(False)
+            self.lineEdit_q_pocket.setEnabled(False)
+            self.lineEdit_q_messages.setEnabled(False)
+            self.lineEdit_mail_delay.setEnabled(False)
+            self.pushButton_send_test_mail.setEnabled(False)
+            self.checkBox_inviz.setEnabled(False)
+            self.pushButton_send_mail.setText('Остановить отправку')
+        elif action_todo == 1:
+            self.toolButton_select_html_file.setEnabled(True)
+            self.toolButton_select_xls_file.setEnabled(True)
+            self.lineEdit_q_pocket.setEnabled(True)
+            self.lineEdit_q_messages.setEnabled(True)
+            self.lineEdit_mail_delay.setEnabled(True)
+            self.pushButton_send_test_mail.setEnabled(True)
+            self.checkBox_inviz.setEnabled(True)
+            self.pushButton_send_mail.setText('Отправьте почту')
+
     # событие - нажатие на кнопку выбора файла
     def select_file(self):
         data_of_open_file_name = None
@@ -352,6 +393,16 @@ class Window(PyQt5.QtWidgets.QMainWindow):
 
     # событие - нажатие на кнопку отправки почты
     def send_mail(self):
+        # создание объекта отправки почты в отдельном потоке
+        self.objQtThread = Worker()
+        self.thread = PyQt5.QtCore.QThread()
+        self.moveToThread(self.thread)
+        self.thread.started.connect(self.objQtThread.start)
+        self.objQtThread.finishSignal.connect(self.thread.quit)
+        # self.obj.finishSignal.connect(self.t)
+        self.thread.start()
+
+        # деактивация объектов на форме
         self.activate_obj_on_form(0)
 
         # считаю время 'начало'
@@ -538,26 +589,6 @@ class Window(PyQt5.QtWidgets.QMainWindow):
             self.window_info.exec_()
 
             return f'{_ex}\nЭлектронное письмо не отправлено, проверьте логин-пароль!'
-
-    def activate_obj_on_form(self, action_todo):
-        if action_todo == 0:
-            self.toolButton_select_html_file.setEnabled(False)
-            self.toolButton_select_xls_file.setEnabled(False)
-            self.lineEdit_q_pocket.setEnabled(False)
-            self.lineEdit_q_messages.setEnabled(False)
-            self.lineEdit_mail_delay.setEnabled(False)
-            self.pushButton_send_test_mail.setEnabled(False)
-            self.checkBox_inviz.setEnabled(False)
-            self.pushButton_send_mail.setText('Остановить отправку')
-        elif action_todo == 1:
-            self.toolButton_select_html_file.setEnabled(True)
-            self.toolButton_select_xls_file.setEnabled(True)
-            self.lineEdit_q_pocket.setEnabled(True)
-            self.lineEdit_q_messages.setEnabled(True)
-            self.lineEdit_mail_delay.setEnabled(True)
-            self.pushButton_send_test_mail.setEnabled(True)
-            self.checkBox_inviz.setEnabled(True)
-            self.pushButton_send_mail.setText('Отправьте почту')
 
     # функция расчёта примерного времени
     @staticmethod
