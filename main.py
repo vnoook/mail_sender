@@ -83,16 +83,19 @@ class RecipientData:
 
 
 # класс для отправки почты в отдельном потоке
-class Worker:
+class Worker(PyQt5.QtCore.QObject):
     """Класс для отправки почты в отдельном потоке"""
-    finishSignal = PyQt5.QtCore.pyqtSignal(int)
+
+    finishSignal = PyQt5.QtCore.pyqtSignal()
 
     def __init__(self):
         super(Worker, self).__init__()
 
     def start(self):
-        # тут вставка кода для отправки
-        self.finishSignal.emit(recipient_number) ?????????
+        print('это делается в отдельном потоке')
+        # тут вставка кода для отправки почты
+        # **************************************************************************************
+        # **************************************************************************************
         pass
 
 
@@ -105,8 +108,8 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         super(Window, self).__init__()
 
         # переменные для создания потока
-        self.objQtThread = None
         self.thread = None
+        self.code_2_thread = None
 
         # переменные, атрибуты
         self.window_info = None
@@ -328,7 +331,7 @@ class Window(PyQt5.QtWidgets.QMainWindow):
             self.lineEdit_mail_delay.setEnabled(False)
             self.pushButton_send_test_mail.setEnabled(False)
             self.checkBox_inviz.setEnabled(False)
-            self.pushButton_send_mail.setText('Остановить отправку')
+            self.pushButton_send_mail.setText('Прекратить отправку')
         elif action_todo == 1:
             self.toolButton_select_html_file.setEnabled(True)
             self.toolButton_select_xls_file.setEnabled(True)
@@ -338,6 +341,10 @@ class Window(PyQt5.QtWidgets.QMainWindow):
             self.pushButton_send_test_mail.setEnabled(True)
             self.checkBox_inviz.setEnabled(True)
             self.pushButton_send_mail.setText('Отправьте почту')
+
+    # метод для изменения прогресс-бара на форме
+    def change_progressbarstat_val(self, data):
+        self.progressBarStat.setValue(data)
 
     # событие - нажатие на кнопку выбора файла
     def select_file(self):
@@ -394,12 +401,13 @@ class Window(PyQt5.QtWidgets.QMainWindow):
     # событие - нажатие на кнопку отправки почты
     def send_mail(self):
         # создание объекта отправки почты в отдельном потоке
-        self.objQtThread = Worker()
         self.thread = PyQt5.QtCore.QThread()
-        self.moveToThread(self.thread)
-        self.thread.started.connect(self.objQtThread.start)
-        self.objQtThread.finishSignal.connect(self.thread.quit)
-        # self.obj.finishSignal.connect(self.t)
+        self.code_2_thread = Worker()
+        self.code_2_thread.moveToThread(self.thread)
+        # self.moveToThread(self.thread)
+        self.thread.started.connect(self.code_2_thread.start)
+        self.code_2_thread.finishSignal.connect(self.thread.quit)
+        # self.thread.run()
         self.thread.start()
 
         # деактивация объектов на форме
@@ -470,7 +478,8 @@ class Window(PyQt5.QtWidgets.QMainWindow):
 
         # настройка прогресс-бара
         self.progressBarStat.setMaximum(RecipientData.count_Recipient)
-        self.progressBarStat.setValue(0)
+        # self.progressBarStat.setValue(0)
+        self.change_progressbarstat_val(0)
 
         # участок отправки писем и ожиданий времени
         list_recipients = [x for x in range(1, RecipientData.count_Recipient + 1)]
@@ -495,7 +504,10 @@ class Window(PyQt5.QtWidgets.QMainWindow):
                     smtp_link.starttls()
                     # подключение к аккаунту
                     smtp_link.login(msc.msc_from_address, msc.msc_login_pass)
-                    smtp_link.send_message(msg, msc.msc_from_address, obj_name.email)
+                    if msc.msc_flag_sending:
+                        smtp_link.send_message(msg, msc.msc_from_address, obj_name.email)
+                    else:
+                        print('пропускаю отправку, поменяйте файл msc')
                     smtp_link.quit()
                     obj_name.flag_send_message = True
                     # print('OK')
@@ -510,7 +522,8 @@ class Window(PyQt5.QtWidgets.QMainWindow):
                     self.window_info.exec_()
 
                 # изменения прогресс-бара
-                self.progressBarStat.setValue(recipient_number)
+                # self.progressBarStat.setValue(recipient_number)
+                self.change_progressbarstat_val(recipient_number)
 
                 # print()
 
@@ -549,6 +562,10 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         self.window_info.exec_()
 
         self.activate_obj_on_form(1)
+
+        # print('exit interrupt')
+        # time.sleep(10)
+        # exit()
 
     # событие - нажатие на кнопку отправки тестового письма
     def send_test_mail(self):
