@@ -4,9 +4,11 @@
 # сделать проверку на отправленность и предложить повторную отправку неотправленных писем
 # сделать функцию отправки сообщения, в тестовом и в обычном месте кода
 # дописать функцию check_is_digit
+# подумать над return в send_test_mail
 # заменить несколько функций с вкл-выкл объектов на форме на одну универсальную
 # заменить создание объектов на создание в словаре
 # сделать многопоточность для отправки почты
+# проверить на скорость места - ***1
 
 # ...
 # INSTALL
@@ -35,8 +37,9 @@ class RecipientData:
     """Класс Получателя сообщения"""
 
     # количество экземпляров класса
-    count_Recipient = 0
+    count_recipient = 0
 
+    # инициализация переменных объекта
     def __init__(self, rd_text_message=None):
         self.num = None
         self.fam = None
@@ -48,7 +51,7 @@ class RecipientData:
         self.flag_send_message = False
 
         # изменение счётчика экземпляров
-        RecipientData.count_Recipient += 1
+        RecipientData.count_recipient += 1
 
     # метод получения всех значений аргументов
     def get_all_info(self):
@@ -69,10 +72,12 @@ class RecipientData:
             if glob_val is self:
                 return glob_name
 
-    # метод замены тегов на значения
+    # метод замены тегов в сообщении на значения из экселя
     @staticmethod
-    def replace_text_message(mail_tag, tag_value, mail_text):
-        mail_text = mail_text.replace('{{' + mail_tag + '}}', tag_value)
+    def replace_text_message(mail_tag, mail_tag_value, mail_text):
+        # ***1
+        # mail_text = mail_text.replace('{{' + mail_tag + '}}', mail_tag_value)
+        mail_text = mail_text.replace(''.join(('{{', mail_tag, '}}')), mail_tag_value)
         return mail_text
 
     # переопределение метода для замены тегов в почтовом сообщении
@@ -83,21 +88,37 @@ class RecipientData:
         return object.__setattr__(self, key, value)
 
 
-# класс для отправки почты в отдельном потоке
-class Worker(PyQt5.QtCore.QObject):
-    """Класс для отправки почты в отдельном потоке"""
-
-    finishSignal = PyQt5.QtCore.pyqtSignal()
+# класс потока, для отправки почты в отдельном потоке
+class Thread(PyQt5.QtCore.QThread):
+    # сигналы для прогресс-бара и окончания потока
+    progress_bar_signal = PyQt5.QtCore.pyqtSignal(int)
+    finish_signal = PyQt5.QtCore.pyqtSignal()
 
     def __init__(self):
-        super(Worker, self).__init__()
+        super().__init__()
 
-    def start(self):
-        print('это делается в отдельном потоке')
-        # тут вставка кода для отправки почты
-        # **************************************************************************************
-        # **************************************************************************************
-        pass
+    def run(self):
+        print()
+        print('_____________Отдельный поток начался')
+        # globals() = RecipientData, Thread
+        # print(f'{self.sender().__class__.__name__ = }')
+        # self.sender().objectName()
+        # self.progress_bar_signal.emit(0)
+        # ***********************************
+        for x in range(100+1):
+            self.progress_bar_signal.emit(x)
+            time.sleep(0.05)
+        # ***********************************
+        self.finish_signal.emit()
+        # self.thread = {}
+        print('_____________Отдельный поток кончился')
+        print()
+
+    def stop(self):
+        print('_____!!!_____Отдельный поток принудительно остановлен')
+        self.finish_signal.emit()
+        self.terminate()
+        self.thread = {}
 
 
 # класс главного окна
@@ -106,11 +127,11 @@ class Window(PyQt5.QtWidgets.QMainWindow):
 
     # описание главного окна
     def __init__(self):
-        super(Window, self).__init__()
+        # super(Window, self).__init__()
+        super().__init__()
 
         # переменные для создания потока
-        self.thread = None
-        self.code_2_thread = None
+        self.thread = {}
 
         # переменные, атрибуты
         self.window_info = None
@@ -124,9 +145,9 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         # количество писем в одном пакете отправки, в штуках
         self.q_pocket = 5
         # задержка между письмами в пакете при отправке, в секундах
-        self.q_messages = 1 # 3
+        self.q_messages = 1  # 3
         # задержка между отправками пакетов, в секундах
-        self.send_delay = 1 # 300  # 5 минут
+        self.send_delay = 1  # 300 # 5 минут
 
         # главное окно, надпись на нём и размеры
         self.setWindowTitle('Рассылка почты из XLS файла на основе шаблона HTML')
@@ -268,7 +289,8 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         self.pushButton_send_mail.setText('Отправьте почту')
         self.pushButton_send_mail.setGeometry(PyQt5.QtCore.QRect(10, 320, 180, 25))
         self.pushButton_send_mail.setFixedWidth(130)
-        self.pushButton_send_mail.clicked.connect(self.send_mail)
+        # self.pushButton_send_mail.clicked.connect(self.send_mail)
+        self.pushButton_send_mail.clicked.connect(self.init_thread)
         self.pushButton_send_mail.setToolTip(self.pushButton_send_mail.objectName())
 
         # SEND_TEST_MAIL
@@ -307,12 +329,46 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         self.checkBox_inviz = PyQt5.QtWidgets.QCheckBox(self)
         self.checkBox_inviz.setObjectName('checkBox_inviz')
         self.checkBox_inviz.setGeometry(PyQt5.QtCore.QRect(10, 450, 190, 40))
-        self.checkBox_inviz.clicked.connect(self.on_off_lineedits)
+        self.checkBox_inviz.clicked.connect(self.on_off_lineedits_delays)
         self.checkBox_inviz.setText('Хочу редактировать!')
         self.checkBox_inviz.setToolTip(self.checkBox_inviz.objectName())
 
-    # событие - скрытие\отображение возможности редактирования полей
-    def on_off_lineedits(self):
+    # метод инициализации что нужно делать - стартовать или останавливать поток
+    def init_thread(self):
+        # выбор функции зависит от наполненности словаря с потоком
+        if not self.thread:
+            self.start_thread()
+        else:
+            self.stop_thread()
+
+    # метод старта потока и привязка сигналов к функциям
+    def start_thread(self):
+        self.thread['Thread'] = Thread()
+        self.thread['Thread'].start()
+        self.thread['Thread'].progress_bar_signal.connect(self.change_progressbarstat_val)
+        self.thread['Thread'].finish_signal.connect(self.finished)
+        # деактивация объектов на форме
+        self.activate_obj_on_form(0)
+
+    # метод остановки потока и обнуление словаря потока
+    def stop_thread(self):
+        self.thread['Thread'].stop()
+        self.thread = {}
+        # активация объектов на форме
+        self.activate_obj_on_form(1)
+
+    # метод должен успешного окончания потока
+    def finished(self):
+        self.thread = {}
+        # активация объектов на форме
+        self.activate_obj_on_form(1)
+
+    # метод для изменения прогресс-бара на форме
+    def change_progressbarstat_val(self, val_int):
+        self.progressBarStat.setValue(val_int)
+
+    # событие - скрытие\отображение возможности редактирования полей задержек при отправке
+    def on_off_lineedits_delays(self):
         if self.checkBox_inviz.isChecked():
             self.lineEdit_q_pocket.setEnabled(True)
             self.lineEdit_q_messages.setEnabled(True)
@@ -322,7 +378,7 @@ class Window(PyQt5.QtWidgets.QMainWindow):
             self.lineEdit_q_messages.setEnabled(False)
             self.lineEdit_mail_delay.setEnabled(False)
 
-    # событие - скрытие\отображение возможности редактирования полей
+    # событие - скрытие\отображение возможности редактирования полей во время отправки
     def activate_obj_on_form(self, action_todo):
         if action_todo == 0:
             self.toolButton_select_html_file.setEnabled(False)
@@ -336,19 +392,17 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         elif action_todo == 1:
             self.toolButton_select_html_file.setEnabled(True)
             self.toolButton_select_xls_file.setEnabled(True)
-            self.lineEdit_q_pocket.setEnabled(True)
-            self.lineEdit_q_messages.setEnabled(True)
-            self.lineEdit_mail_delay.setEnabled(True)
+            # self.lineEdit_q_pocket.setEnabled(True)
+            # self.lineEdit_q_messages.setEnabled(True)
+            # self.lineEdit_mail_delay.setEnabled(True)
             self.pushButton_send_test_mail.setEnabled(True)
+            self.checkBox_inviz.setChecked(False)
             self.checkBox_inviz.setEnabled(True)
             self.pushButton_send_mail.setText('Отправьте почту')
 
-    # метод для изменения прогресс-бара на форме
-    def change_progressbarstat_val(self, data):
-        self.progressBarStat.setValue(data)
-
     # событие - нажатие на кнопку выбора файла
     def select_file(self):
+        # переменная для хранения информации из окна выбора файла
         data_of_open_file_name = None
         # запоминание старого значения пути выбора файлов
         old_path_of_selected_html_file = self.label_path_html_file.text()
@@ -401,18 +455,9 @@ class Window(PyQt5.QtWidgets.QMainWindow):
 
     # событие - нажатие на кнопку отправки почты
     def send_mail(self):
-        # создание объекта отправки почты в отдельном потоке
-        self.thread = PyQt5.QtCore.QThread()
-        self.code_2_thread = Worker()
-        self.code_2_thread.moveToThread(self.thread)
-        # self.moveToThread(self.thread)
-        self.thread.started.connect(self.code_2_thread.start)
-        self.code_2_thread.finishSignal.connect(self.thread.quit)
-        # self.thread.run()
-        self.thread.start()
-
-        # деактивация объектов на форме
-        self.activate_obj_on_form(0)
+        # index = self.sender()
+        # self.sender().objectName()
+        # print(index, index.__class__, index.__class__.__name__, sep=' ... ')
 
         # считаю время 'начало'
         time_start = time.monotonic()
@@ -474,18 +519,18 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         # print()
 
         print(f'примерное время выполнения '
-              f'{self.time_count(RecipientData.count_Recipient, self.q_pocket, self.q_messages, self.send_delay)}'
+              f'{self.time_count(RecipientData.count_recipient, self.q_pocket, self.q_messages, self.send_delay)}'
               f' секунд')
 
         # настройка прогресс-бара
-        self.progressBarStat.setMaximum(RecipientData.count_Recipient)
+        self.progressBarStat.setMaximum(RecipientData.count_recipient)
         # self.progressBarStat.setValue(0)
         self.change_progressbarstat_val(0)
 
         # участок отправки писем и ожиданий времени
-        list_recipients = [x for x in range(1, RecipientData.count_Recipient + 1)]
+        list_recipients = [x for x in range(1, RecipientData.count_recipient + 1)]
         # print()
-        for recipient in range(0, RecipientData.count_Recipient, self.q_pocket):
+        for recipient in range(0, RecipientData.count_recipient, self.q_pocket):
             list_recipients_pocket = list_recipients[recipient: recipient + self.q_pocket]
 
             for recipient_number in list_recipients_pocket:
@@ -534,7 +579,7 @@ class Window(PyQt5.QtWidgets.QMainWindow):
                     time.sleep(self.q_messages)
 
             if len(list_recipients_pocket) == self.q_pocket:
-                if RecipientData.count_Recipient not in list_recipients_pocket:
+                if RecipientData.count_recipient not in list_recipients_pocket:
                     # print('задержка в секундах между пакетами отправки', self.send_delay)
                     # print()
                     time.sleep(self.send_delay)
@@ -547,7 +592,7 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         # print()
 
         # обнуление счётчика количества объектов для возможности повторной отправки рассылки
-        RecipientData.count_Recipient = 0
+        RecipientData.count_recipient = 0
 
         # закрываю файл
         wb_xls.close()
@@ -586,7 +631,10 @@ class Window(PyQt5.QtWidgets.QMainWindow):
             msg['From'] = msc.msc_from_address
             msg['To'] = msc.msc_test_address
             msg['Subject'] = msc.msc_subject_text
-            smtp_link.send_message(msg, msc.msc_from_address, msc.msc_test_address)
+            if msc.msc_flag_sending:
+                smtp_link.send_message(msg, msc.msc_from_address, msc.msc_test_address)
+            else:
+                print('пропускаю отправку, поменяйте файл msc')
             smtp_link.quit()
             # print('Электронное письмо отправлено удачно!')
 
@@ -608,7 +656,7 @@ class Window(PyQt5.QtWidgets.QMainWindow):
 
             return f'{_ex}\nЭлектронное письмо не отправлено, проверьте логин-пароль!'
 
-    # функция расчёта примерного времени
+    # функция расчёта примерного времени требуемого для отправки всех писем
     @staticmethod
     def time_count(letters_all=16, letters_pack=5, delay_letter=3, delay_pack=300):
         q_full_pack = letters_all // letters_pack
@@ -623,7 +671,6 @@ class Window(PyQt5.QtWidgets.QMainWindow):
             time_short_pack = ((letters_all % letters_pack) - 1) * delay_letter
 
         time_all = time_pack + time_letters + time_short_pack
-
         return time_all
 
     # событие - нажатие на кнопку Выход
@@ -631,12 +678,15 @@ class Window(PyQt5.QtWidgets.QMainWindow):
     def click_on_btn_exit():
         exit()
 
-    # проверка строка на числовое значение - взять число из поля или взять значение по умолчанию
+    # проверка строки на числовое значение - взять число из поля или взять значение по умолчанию
     @staticmethod
     def check_is_digit(data_in):
         # TODO
         # тут дописать функцию, описание вверху
-        return data_in
+        if isinstance(data_in, int):
+            return data_in
+        else:
+            return "".join(char for char in data_in if char.isdecimal())
 
 
 # создание основного окна
