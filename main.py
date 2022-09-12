@@ -94,8 +94,11 @@ class Thread(PyQt5.QtCore.QThread):
     progress_bar_signal = PyQt5.QtCore.pyqtSignal(int)
     finish_signal = PyQt5.QtCore.pyqtSignal()
 
-    def __init__(self):
+    def __init__(self, args_main_form):
         super().__init__()
+
+        # кортеж для передачи свойств с главной формы
+        self.args = args_main_form
 
     def run(self):
         # globals() = RecipientData, Thread
@@ -113,75 +116,80 @@ class Thread(PyQt5.QtCore.QThread):
         print()
         print('_____________Отдельный поток начался')
 
-        # # ***********************************
-        # # считаю время 'начало'
-        # time_start = time.monotonic()
-        #
-        # # установка текущих значений переменных ожидания
-        # self.q_pocket = int(self.lineEdit_q_pocket.text())
-        # self.q_messages = int(self.lineEdit_q_messages.text())
-        # self.send_delay = int(self.lineEdit_mail_delay.text())
-        #
-        # # открываю файл HTML
-        # with open(self.label_path_html_file.text(), 'r') as file_html:
-        #     all_strings_html_file = file_html.read()
-        #
-        # # открываю файл XLS и выбираю активный лист
-        # wb_xls = openpyxl.load_workbook(self.label_path_xls_file.text())
-        # wb_xls_s = wb_xls.active
-        #
-        # # переменные для обработки XLS
-        # list_replaced_words = []  # список слов для замены в HTML файле
-        #
-        # # счётчик объектов, с 0 потому что первая строка шапка и там нет обрабатываемых данных
-        # obj_count = 0
-        # # короткое обращение к объекту, утилитарная переменная
-        # obj_name = None
-        #
-        # # получение значений ячеек из XLS файла
-        # for row_in_xls in range(1, wb_xls_s.max_row + 1):
-        #     for col_in_xls in range(1, wb_xls_s.max_column + 1):
-        #         # значение ячейки
-        #         cell_value = wb_xls_s.cell(row_in_xls, col_in_xls).value
-        #
-        #         # если первая строка, то сформировать список спецстрок из шапки, которые нужно будет искать и заменять
-        #         # иначе обрабатывается остальные строки с данными
-        #         if row_in_xls == 1:
-        #             # считываются все, кроме email значения и вносятся для последующей теговой замены
-        #             if cell_value != 'email':  # если не колонка с почтами
-        #                 list_replaced_words.append(cell_value)
-        #         else:
-        #             # если первая колонка, то создаётся объект, иначе просто заполняются атрибуты из ячеек
-        #             if col_in_xls == 1:
-        #                 # увеличение итерации счётчика созданных объектов
-        #                 obj_count += 1
-        #
-        #                 # создание объекта
-        #                 globals()['Recipient' + str(obj_count)] = RecipientData(rd_text_message=all_strings_html_file)
-        #
-        #                 # короткое обращение к созданному объекту
-        #                 obj_name = globals()['Recipient' + str(obj_count)]
-        #
-        #                 # заполнение первого аргумента
-        #                 obj_name.__setattr__(wb_xls_s.cell(1, col_in_xls).value, str(cell_value))
-        #             else:
-        #                 # заполнение остальных атрибутов по названиям колонок в верхней строке
-        #                 obj_name.__setattr__(wb_xls_s.cell(1, col_in_xls).value, cell_value)
-        #
-        # # # временная выдача данных перед отправкой, потом удалить!!!!!!!!!!!!!!!!
-        # # for count_obj in range(1, RecipientData.count_Recipient + 1):
-        # #     print(f'{globals()["Recipient" + str(count_obj)].get_all_info()}')
-        # # print()
-        #
-        # print(f'примерное время выполнения '
-        #       f'{self.time_count(RecipientData.count_recipient, self.q_pocket, self.q_messages, self.send_delay)}'
-        #       f' секунд')
-        #
-        # # настройка прогресс-бара
-        # self.progressBarStat.setMaximum(RecipientData.count_recipient)
-        # # self.progressBarStat.setValue(0)
-        # self.change_progressbarstat_val(0)
-        #
+        # ***********************************
+        # считаю время 'начало'
+        time_start = time.monotonic()
+
+        # установка текущих значений переменных ожидания
+        q_pocket = self.args[0]
+        q_messages = self.args[1]
+        send_delay = self.args[2]
+
+        # открываю файл HTML
+        with open(self.args[3], 'r') as file_html:
+            all_strings_html_file = file_html.read()
+
+        # открываю файл XLS и выбираю активный лист
+        wb_xls = openpyxl.load_workbook(self.args[4])
+        wb_xls_s = wb_xls.active
+
+        # переменные для обработки XLS
+        list_replaced_words = []  # список слов для замены в HTML файле
+
+        # счётчик объектов, с 0 потому что первая строка шапка и там нет обрабатываемых данных
+        obj_count = 0
+        # короткое обращение к объекту, утилитарная переменная
+        obj_name = None
+
+        # получение значений ячеек из XLS файла
+        for row_in_xls in range(1, wb_xls_s.max_row + 1):
+            for col_in_xls in range(1, wb_xls_s.max_column + 1):
+                # значение ячейки
+                cell_value = wb_xls_s.cell(row_in_xls, col_in_xls).value
+
+                # если первая строка, то сформировать список спецстрок из шапки, которые нужно будет искать и заменять
+                # иначе обрабатывается остальные строки с данными
+                if row_in_xls == 1:
+                    # считываются все, кроме email значения и вносятся для последующей теговой замены
+                    if cell_value != 'email':  # если не колонка с почтами
+                        list_replaced_words.append(cell_value)
+                else:
+                    # если первая колонка, то создаётся объект, иначе просто заполняются атрибуты из ячеек
+                    if col_in_xls == 1:
+                        # увеличение итерации счётчика созданных объектов
+                        obj_count += 1
+
+                        # создание объекта
+                        globals()['Recipient' + str(obj_count)] = RecipientData(rd_text_message=all_strings_html_file)
+
+                        # короткое обращение к созданному объекту
+                        obj_name = globals()['Recipient' + str(obj_count)]
+
+                        # заполнение первого аргумента
+                        obj_name.__setattr__(wb_xls_s.cell(1, col_in_xls).value, str(cell_value))
+                    else:
+                        # заполнение остальных атрибутов по названиям колонок в верхней строке
+                        obj_name.__setattr__(wb_xls_s.cell(1, col_in_xls).value, cell_value)
+
+        for key, val in enumerate(self.args):
+            print(f'self.args[{key}] = {val} ... {type(val)}')
+        print()
+
+        # временная выдача данных перед отправкой, потом удалить!!!!!!!!!!!!!!!!
+        for count_obj in range(1, RecipientData.count_recipient + 1):
+            print(f'{globals()["Recipient" + str(count_obj)].get_all_info()}')
+        print()
+
+        print(f'примерное время выполнения '
+              f'{self.time_count(RecipientData.count_recipient, self.args[0], self.args[1], self.args[2])}'
+              f' секунд')
+
+
+        # настройка прогресс-бара
+        self.progressBarStat.setMaximum(RecipientData.count_recipient)
+        # self.progressBarStat.setValue(0)
+        self.change_progressbarstat_val(0)
+
         # # участок отправки писем и ожиданий времени
         # list_recipients = [x for x in range(1, RecipientData.count_recipient + 1)]
         # # print()
@@ -240,21 +248,23 @@ class Thread(PyQt5.QtCore.QThread):
         #             time.sleep(self.send_delay)
         #
         # # print(f' -=- Отправка окончена -=- ')
-        #
-        # # # временная выдача данных после отправки, потом удалить!!!!!!!!!!!!!!!!
-        # # for count_obj in range(1, RecipientData.count_Recipient + 1):
-        # #     print(f'{globals()["Recipient" + str(count_obj)].get_all_info()}')
-        # # print()
-        #
-        # # обнуление счётчика количества объектов для возможности повторной отправки рассылки
-        # RecipientData.count_recipient = 0
-        #
-        # # закрываю файл
-        # wb_xls.close()
-        #
-        # # считаю время 'конец'
-        # time_finish = time.monotonic()
-        #
+
+        pass
+
+        # # временная выдача данных после отправки, потом удалить!!!!!!!!!!!!!!!!
+        # for count_obj in range(1, RecipientData.count_recipient + 1):
+        #     print(f'{globals()["Recipient" + str(count_obj)].get_all_info()}')
+        # print()
+
+        # обнуление счётчика количества объектов для возможности повторной отправки рассылки
+        RecipientData.count_recipient = 0
+
+        # закрываю файл
+        wb_xls.close()
+
+        # считаю время 'конец'
+        time_finish = time.monotonic()
+
         # # информационное окно об окончании работы программы
         # self.window_info = PyQt5.QtWidgets.QMessageBox()
         # self.window_info.setWindowTitle('Окончено')
@@ -275,6 +285,23 @@ class Thread(PyQt5.QtCore.QThread):
         self.finish_signal.emit()
         self.terminate()
         self.thread = {}
+
+    # функция расчёта примерного времени требуемого для отправки всех писем
+    @staticmethod
+    def time_count(letters_all=16, letters_pack=5, delay_letter=3, delay_pack=300):
+        q_full_pack = letters_all // letters_pack
+
+        if letters_all % letters_pack == 0:
+            time_pack = (q_full_pack - 1) * delay_pack
+            time_letters = (((letters_pack - 1) * delay_letter) * q_full_pack)
+            time_short_pack = 0
+        else:
+            time_pack = q_full_pack * delay_pack
+            time_letters = (((letters_pack - 1) * delay_letter) * q_full_pack)
+            time_short_pack = ((letters_all % letters_pack) - 1) * delay_letter
+
+        time_all = time_pack + time_letters + time_short_pack
+        return time_all
 
 
 # класс главного окна
@@ -499,7 +526,16 @@ class Window(PyQt5.QtWidgets.QMainWindow):
 
     # метод старта потока и привязка сигналов к функциям
     def start_thread(self):
-        self.thread['Thread'] = Thread()
+        # кортеж для передачи задержек в объект потока
+        args_main_form = (int(self.lineEdit_q_pocket.text()),
+                          int(self.lineEdit_q_messages.text()),
+                          int(self.lineEdit_mail_delay.text()),
+                          self.label_path_html_file.text(),
+                          self.label_path_xls_file.text()
+                          )
+
+        # создание объекта потока
+        self.thread['Thread'] = Thread(args_main_form)
         self.thread['Thread'].start()
         self.thread['Thread'].progress_bar_signal.connect(self.change_progressbarstat_val)
         self.thread['Thread'].finish_signal.connect(self.finished)
@@ -670,7 +706,7 @@ class Window(PyQt5.QtWidgets.QMainWindow):
     #                     obj_name.__setattr__(wb_xls_s.cell(1, col_in_xls).value, cell_value)
     #
     #     # # временная выдача данных перед отправкой, потом удалить!!!!!!!!!!!!!!!!
-    #     # for count_obj in range(1, RecipientData.count_Recipient + 1):
+    #     # for count_obj in range(1, RecipientData.count_recipient + 1):
     #     #     print(f'{globals()["Recipient" + str(count_obj)].get_all_info()}')
     #     # print()
     #
@@ -743,7 +779,7 @@ class Window(PyQt5.QtWidgets.QMainWindow):
     #     # print(f' -=- Отправка окончена -=- ')
     #
     #     # # временная выдача данных после отправки, потом удалить!!!!!!!!!!!!!!!!
-    #     # for count_obj in range(1, RecipientData.count_Recipient + 1):
+    #     # for count_obj in range(1, RecipientData.count_recipient + 1):
     #     #     print(f'{globals()["Recipient" + str(count_obj)].get_all_info()}')
     #     # print()
     #
@@ -813,23 +849,6 @@ class Window(PyQt5.QtWidgets.QMainWindow):
             self.window_info.exec_()
 
             return f'{_ex}\nЭлектронное письмо не отправлено, проверьте логин-пароль!'
-
-    # функция расчёта примерного времени требуемого для отправки всех писем
-    @staticmethod
-    def time_count(letters_all=16, letters_pack=5, delay_letter=3, delay_pack=300):
-        q_full_pack = letters_all // letters_pack
-
-        if letters_all % letters_pack == 0:
-            time_pack = (q_full_pack - 1) * delay_pack
-            time_letters = (((letters_pack - 1) * delay_letter) * q_full_pack)
-            time_short_pack = 0
-        else:
-            time_pack = q_full_pack * delay_pack
-            time_letters = (((letters_pack - 1) * delay_letter) * q_full_pack)
-            time_short_pack = ((letters_all % letters_pack) - 1) * delay_letter
-
-        time_all = time_pack + time_letters + time_short_pack
-        return time_all
 
     # событие - нажатие на кнопку Выход
     @staticmethod
