@@ -102,17 +102,9 @@ class Thread(PyQt5.QtCore.QThread):
         self.args = args_main_form
 
     def run(self):
-        # globals() = RecipientData, Thread
-        # print(f'{self.sender().__class__.__name__ = }')
-        # self.sender().objectName()
-        # self.signal_progress_bar.emit(0)
-        # index = self.sender()
-        # print(index, index.__class__, index.__class__.__name__, sep=' ... ')
-
         print()
         print('_____________Отдельный поток начался')
 
-        # ***********************************
         # считаю время 'начало'
         time_start = time.monotonic()
 
@@ -120,13 +112,17 @@ class Thread(PyQt5.QtCore.QThread):
         q_pocket = self.args[0]
         q_messages = self.args[1]
         send_delay = self.args[2]
+        html_file = self.args[3]
+        xls_file = self.args[4]
 
+        print('____открываю файл HTML')
         # открываю файл HTML
-        with open(self.args[3], 'r') as file_html:
+        with open(html_file, 'r') as file_html:
             all_strings_html_file = file_html.read()
 
+        print('____открываю файл XLS')
         # открываю файл XLS и выбираю активный лист
-        wb_xls = openpyxl.load_workbook(self.args[4])
+        wb_xls = openpyxl.load_workbook(xls_file)
         wb_xls_s = wb_xls.active
 
         # переменные для обработки XLS
@@ -137,6 +133,7 @@ class Thread(PyQt5.QtCore.QThread):
         # короткое обращение к объекту, утилитарная переменная
         obj_name = None
 
+        print('____получение значений ячеек из XLS файла')
         # получение значений ячеек из XLS файла
         for row_in_xls in range(1, wb_xls_s.max_row + 1):
             for col_in_xls in range(1, wb_xls_s.max_column + 1):
@@ -167,88 +164,76 @@ class Thread(PyQt5.QtCore.QThread):
                         # заполнение остальных атрибутов по названиям колонок в верхней строке
                         obj_name.__setattr__(wb_xls_s.cell(1, col_in_xls).value, cell_value)
 
-        # for key, val in enumerate(self.args):
-        #     print(f'self.args[{key}] = {val} ... {type(val)}')
-        # print()
-
-        # # временная выдача данных перед отправкой, потом удалить!!!!!!!!!!!!!!!!
-        # for count_obj in range(1, RecipientData.count_recipient + 1):
-        #     print(f'{globals()["Recipient" + str(count_obj)].get_all_info()}')
-        # print()
+        print()
+        # временная выдача данных перед отправкой, потом удалить!!!!!!!!!!!!!!!!
+        for count_obj in range(1, RecipientData.count_recipient + 1):
+            print(f'{globals()["Recipient" + str(count_obj)].get_all_info()}')
+        print()
 
         print(f'примерное время выполнения '
-              f'{self.time_count(RecipientData.count_recipient, self.args[0], self.args[1], self.args[2])}'
+              f'{self.time_count(RecipientData.count_recipient, q_pocket, q_messages, send_delay)}'
               f' секунд')
 
         # передача в сигналы данных для настройки прогресс-бара
         self.signal_progress_bar_setMaximum.emit(RecipientData.count_recipient)
         self.signal_progress_bar.emit(0)
 
-        # for x in range(1, RecipientData.count_recipient+1):
-        #     print(f'{x:<3} ... {globals()["Recipient" + str(x)].get_all_info()}')
-        #     self.signal_progress_bar.emit(x)
-        #     time.sleep(0.05)
-
+        print('____отправка писем')
         # участок отправки писем и ожиданий времени
         list_recipients = [x for x in range(1, RecipientData.count_recipient + 1)]
 
-        print(0)
-        # for recipient in range(0, RecipientData.count_recipient, args_main_form[0]):
-        #     print(1)
-        #     list_recipients_pocket = list_recipients[recipient: recipient + args_main_form[0]]
-        #     print(2)
-        #
-        #     for recipient_number in list_recipients_pocket:
-        #         print(3)
-        #         # короткое обращение к объекту
-        #         obj_name = globals()['Recipient' + str(recipient_number)]
-        #
-        #         print(4)
-        #         # создание текста письма
-        #         msg = email.mime.text.MIMEText(obj_name.text_message, 'html')
-        #         msg['From'] = msc.msc_from_address
-        #         msg['To'] = obj_name.email
-        #         msg['Subject'] = 'Проверка отправки почты HTML письмом!'
-        #
-        #         try:
-        #             # print(f'{recipient_number} письмо отправляется', end=' ... ')
-        #             # создание соединения с сервером
-        #             smtp_link = smtplib.SMTP(msc.msc_mail_server)
-        #             smtp_link.starttls()
-        #             # подключение к аккаунту
-        #             smtp_link.login(msc.msc_from_address, msc.msc_login_pass)
-        #             if msc.msc_flag_sending:
-        #                 smtp_link.send_message(msg, msc.msc_from_address, obj_name.email)
-        #             else:
-        #                 print('пропускаю отправку, поменяйте файл msc')
-        #             smtp_link.quit()
-        #             obj_name.flag_send_message = True
-        #             # print('OK')
-        #
-        #         except Exception as _ex:
-        #             # print(f' FAIL error - {_ex}')
-        #
-        #             # информационное окно об ошибке при отправке сообщения
-        #             self.window_info = PyQt5.QtWidgets.QMessageBox()
-        #             self.window_info.setWindowTitle('Ошибка')
-        #             self.window_info.setText(f'Ошибка при отправке.\n{_ex}')
-        #             self.window_info.exec_()
-        #
-        #         # изменения прогресс-бара
-        #         self.signal_progress_bar.emit(recipient_number)
-        #
-        #         # print()
-        #
-        #         if list_recipients_pocket.index(recipient_number) != len(list_recipients_pocket) - 1:
-        #             # print('задержка в секундах между письмами', self.q_messages)
-        #             # print()
-        #             time.sleep(args_main_form[1])
-        #
-        #     if len(list_recipients_pocket) == args_main_form[0]:
-        #         if RecipientData.count_recipient not in list_recipients_pocket:
-        #             # print('задержка в секундах между пакетами отправки', self.send_delay)
-        #             # print()
-        #             time.sleep(args_main_form[2])
+        for recipient in range(0, RecipientData.count_recipient, q_pocket):
+            list_recipients_pocket = list_recipients[recipient: recipient + q_pocket]
+
+            for recipient_number in list_recipients_pocket:
+                # короткое обращение к объекту
+                obj_name = globals()['Recipient' + str(recipient_number)]
+
+                print('____создание текста письма')
+                # создание текста письма
+                msg = email.mime.text.MIMEText(obj_name.text_message, 'html')
+                msg['From'] = msc.msc_from_address
+                msg['To'] = obj_name.email
+                msg['Subject'] = 'Проверка отправки почты HTML письмом!'
+
+                print('____создание соединения с сервером')
+                try:
+                    # print(f'{recipient_number} письмо отправляется', end=' ... ')
+                    # создание соединения с сервером
+                    smtp_link = smtplib.SMTP(msc.msc_mail_server)
+                    smtp_link.starttls()
+                    # подключение к аккаунту
+                    smtp_link.login(msc.msc_from_address, msc.msc_login_pass)
+                    if msc.msc_flag_sending:
+                        smtp_link.send_message(msg, msc.msc_from_address, obj_name.email)
+                    else:
+                        print('пропускаю отправку, поменяйте файл msc')
+                    smtp_link.quit()
+                    obj_name.flag_send_message = True
+                    # print('OK')
+
+                except Exception as _ex:
+                    # информационное окно об ошибке при отправке сообщения
+                    self.window_info = PyQt5.QtWidgets.QMessageBox()
+                    self.window_info.setWindowTitle('Ошибка')
+                    self.window_info.setText(f'Ошибка при отправке.\n{_ex}')
+                    self.window_info.exec_()
+
+                print('____изменения прогресс-бара')
+                # изменения прогресс-бара
+                self.signal_progress_bar.emit(recipient_number)
+                print()
+
+                if list_recipients_pocket.index(recipient_number) != len(list_recipients_pocket) - 1:
+                    print('задержка в секундах между письмами', q_messages)
+                    print()
+                    time.sleep(q_messages)
+
+            if len(list_recipients_pocket) == q_pocket:
+                if RecipientData.count_recipient not in list_recipients_pocket:
+                    print('задержка в секундах между пакетами отправки', send_delay)
+                    print()
+                    time.sleep(send_delay)
 
         print(f' -=- Отправка окончена -=- ')
 
@@ -496,8 +481,9 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         self.progressBarStat.setObjectName('progressBarStat')
         self.progressBarStat.setGeometry(PyQt5.QtCore.QRect(10, 360, 320, 25))
         self.progressBarStat.setMinimum(0)
-        self.progressBarStat.setMaximum(100)
+        self.progressBarStat.setMaximum(10)
         self.progressBarStat.setValue(0)
+        self.progressBarStat.setFormat('%p %')
         self.progressBarStat.setToolTip(self.progressBarStat.objectName())
 
         # EXIT
