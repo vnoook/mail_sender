@@ -115,6 +115,7 @@ class Thread(PyQt5.QtCore.QThread):
         send_delay = self.args[2]
         html_file = self.args[3]
         xls_file = self.args[4]
+        subject_letter = self.args[5]
 
         print()
         print('____ открываю файл HTML')
@@ -199,7 +200,7 @@ class Thread(PyQt5.QtCore.QThread):
                 msg = email.mime.text.MIMEText(obj_name.text_message, 'html')
                 msg['From'] = msc.msc_from_address
                 msg['To'] = obj_name.email
-                msg['Subject'] = 'Проверка отправки почты HTML письмом!'
+                msg['Subject'] = str(subject_letter)
 
                 try:
                     if msc.msc_flag_sending:
@@ -332,7 +333,7 @@ class Window(PyQt5.QtWidgets.QMainWindow):
 
         # главное окно, надпись на нём и размеры
         self.setWindowTitle('Рассылка почты из XLS файла на основе шаблона HTML')
-        self.setGeometry(200, 200, 700, 450)
+        self.setGeometry(450, 100, 700, 490)
 
         # ОБЪЕКТЫ НА ФОРМЕ
         # HTML
@@ -462,13 +463,22 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         self.lineEdit_mail_delay.setEnabled(False)
         self.lineEdit_mail_delay.setToolTip(self.lineEdit_mail_delay.objectName())
 
+        # lineEdit_subject_letter
+        self.lineEdit_subject_letter = PyQt5.QtWidgets.QLineEdit(self)
+        self.lineEdit_subject_letter.setObjectName('lineEdit_subject_letter')
+        self.lineEdit_subject_letter.setText('Тема письма - проверка отправки почты HTML письмом!')
+        self.lineEdit_subject_letter.setGeometry(PyQt5.QtCore.QRect(10, 320, 320, 25))
+        self.lineEdit_subject_letter.setClearButtonEnabled(True)
+        self.lineEdit_subject_letter.setEnabled(True)
+        self.lineEdit_subject_letter.setToolTip(self.lineEdit_subject_letter.objectName())
+
         # SEND_MAIL
         # pushButton_send_mail
         self.pushButton_send_mail = PyQt5.QtWidgets.QPushButton(self)
         self.pushButton_send_mail.setObjectName('pushButton_send_mail')
         self.pushButton_send_mail.setEnabled(False)
         self.pushButton_send_mail.setText('Отправьте почту')
-        self.pushButton_send_mail.setGeometry(PyQt5.QtCore.QRect(10, 320, 180, 25))
+        self.pushButton_send_mail.setGeometry(PyQt5.QtCore.QRect(10, 360, 180, 25))
         self.pushButton_send_mail.setFixedWidth(130)
         self.pushButton_send_mail.clicked.connect(self.init_thread)
         self.pushButton_send_mail.setToolTip(self.pushButton_send_mail.objectName())
@@ -479,7 +489,7 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         self.pushButton_send_test_mail.setObjectName('pushButton_send_test_mail')
         self.pushButton_send_test_mail.setEnabled(False)
         self.pushButton_send_test_mail.setText('Тестовое письмо')
-        self.pushButton_send_test_mail.setGeometry(PyQt5.QtCore.QRect(200, 320, 300, 25))
+        self.pushButton_send_test_mail.setGeometry(PyQt5.QtCore.QRect(200, 360, 300, 25))
         self.pushButton_send_test_mail.setFixedWidth(130)
         self.pushButton_send_test_mail.clicked.connect(self.send_test_mail)
         self.pushButton_send_test_mail.setToolTip(self.pushButton_send_test_mail.objectName())
@@ -488,7 +498,7 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         # progressBarStat
         self.progressBarStat = PyQt5.QtWidgets.QProgressBar(self)
         self.progressBarStat.setObjectName('progressBarStat')
-        self.progressBarStat.setGeometry(PyQt5.QtCore.QRect(10, 360, 320, 25))
+        self.progressBarStat.setGeometry(PyQt5.QtCore.QRect(10, 400, 320, 25))
         self.progressBarStat.setMinimum(0)
         self.progressBarStat.setMaximum(10)
         self.progressBarStat.setValue(0)
@@ -500,7 +510,7 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         self.button_exit = PyQt5.QtWidgets.QPushButton(self)
         self.button_exit.setObjectName('button_exit')
         self.button_exit.setText('Выход')
-        self.button_exit.setGeometry(PyQt5.QtCore.QRect(10, 410, 180, 25))
+        self.button_exit.setGeometry(PyQt5.QtCore.QRect(10, 450, 180, 25))
         self.button_exit.setFixedWidth(50)
         self.button_exit.clicked.connect(self.click_on_btn_exit)
         self.button_exit.setToolTip(self.button_exit.objectName())
@@ -509,7 +519,7 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         # checkBox_inviz
         self.checkBox_inviz = PyQt5.QtWidgets.QCheckBox(self)
         self.checkBox_inviz.setObjectName('checkBox_inviz')
-        self.checkBox_inviz.setGeometry(PyQt5.QtCore.QRect(10, 450, 190, 40))
+        self.checkBox_inviz.setGeometry(PyQt5.QtCore.QRect(10, 500, 190, 40))
         self.checkBox_inviz.clicked.connect(self.on_off_lineedits_delays)
         self.checkBox_inviz.setText('Хочу редактировать!')
         self.checkBox_inviz.setToolTip(self.checkBox_inviz.objectName())
@@ -529,7 +539,8 @@ class Window(PyQt5.QtWidgets.QMainWindow):
                           int(self.lineEdit_q_messages.text()),
                           int(self.lineEdit_mail_delay.text()),
                           self.label_path_html_file.text(),
-                          self.label_path_xls_file.text()
+                          self.label_path_xls_file.text(),
+                          self.lineEdit_subject_letter.text(),
                           )
 
         # создание объекта потока
