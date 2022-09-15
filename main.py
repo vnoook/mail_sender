@@ -264,10 +264,10 @@ class Thread(PyQt5.QtCore.QThread):
         self.signal_finish_thread.emit()
 
         print()
-        print('_____________Отдельный поток кончился')
+        print('_____________ отдельный поток кончился')
 
     def stop(self):
-        print('_____!!!_____Отдельный поток принудительно остановлен')
+        print('_____!!!!!!!!!_____ отдельный поток принудительно остановлен')
         self.signal_finish_thread.emit()
         self.terminate()
         self.thread = {}
@@ -470,7 +470,6 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         self.pushButton_send_mail.setText('Отправьте почту')
         self.pushButton_send_mail.setGeometry(PyQt5.QtCore.QRect(10, 320, 180, 25))
         self.pushButton_send_mail.setFixedWidth(130)
-        # self.pushButton_send_mail.clicked.connect(self.send_mail)
         self.pushButton_send_mail.clicked.connect(self.init_thread)
         self.pushButton_send_mail.setToolTip(self.pushButton_send_mail.objectName())
 
