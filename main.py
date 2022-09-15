@@ -469,7 +469,7 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         self.lineEdit_subject_letter.setText('Тема письма - проверка отправки почты HTML письмом!')
         self.lineEdit_subject_letter.setGeometry(PyQt5.QtCore.QRect(10, 320, 320, 25))
         self.lineEdit_subject_letter.setClearButtonEnabled(True)
-        self.lineEdit_subject_letter.setEnabled(True)
+        self.lineEdit_subject_letter.setEnabled(False)
         self.lineEdit_subject_letter.setToolTip(self.lineEdit_subject_letter.objectName())
 
         # SEND_MAIL
@@ -595,17 +595,22 @@ class Window(PyQt5.QtWidgets.QMainWindow):
             self.lineEdit_mail_delay.setEnabled(False)
             self.pushButton_send_test_mail.setEnabled(False)
             self.checkBox_inviz.setEnabled(False)
+            self.lineEdit_subject_letter.setEnabled(False)
             self.pushButton_send_mail.setText('Прекратить отправку')
         elif action_todo == 1:
-            self.toolButton_select_html_file.setEnabled(True)
-            self.toolButton_select_xls_file.setEnabled(True)
-            # self.lineEdit_q_pocket.setEnabled(True)
-            # self.lineEdit_q_messages.setEnabled(True)
-            # self.lineEdit_mail_delay.setEnabled(True)
-            self.pushButton_send_test_mail.setEnabled(True)
-            self.checkBox_inviz.setChecked(False)
-            self.checkBox_inviz.setEnabled(True)
-            self.pushButton_send_mail.setText('Отправьте почту')
+            if all((self.lineEdit_subject_letter.text(),
+                        self.lineEdit_q_pocket.text(),
+                        self.lineEdit_q_messages.text(),
+                        self.lineEdit_mail_delay.text())):
+                self.toolButton_select_html_file.setEnabled(True)
+                self.toolButton_select_xls_file.setEnabled(True)
+                self.pushButton_send_test_mail.setEnabled(True)
+                self.checkBox_inviz.setChecked(False)
+                self.checkBox_inviz.setEnabled(True)
+                self.lineEdit_subject_letter.setEnabled(True)
+                self.pushButton_send_mail.setText('Отправьте почту')
+            else:
+                print('заполните путые поля')
 
     # событие - нажатие на кнопку выбора файла
     def select_file(self):
@@ -659,6 +664,7 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         if self.text_empty_path_file not in (self.label_path_html_file.text(), self.label_path_xls_file.text()):
             self.pushButton_send_mail.setEnabled(True)
             self.pushButton_send_test_mail.setEnabled(True)
+            self.lineEdit_subject_letter.setEnabled(True)
 
     # событие - нажатие на кнопку отправки тестового письма
     def send_test_mail(self):
