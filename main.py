@@ -1,21 +1,26 @@
 # TODO
 # сделать сопоставление задержек с полями на форме, с их проверкой на числа
-# сделать прогресс-бар по отправке, считать количество или время?
 # сделать проверку на отправленность и предложить повторную отправку неотправленных писем
 # сделать функцию отправки сообщения, в тестовом и в обычном месте кода
 # дописать функцию check_is_digit
-# подумать над return в send_test_mail
 # заменить несколько функций с вкл-выкл объектов на форме на одну универсальную
 # заменить создание объектов на создание в словаре
-# сделать многопоточность для отправки почты
 # проверить на скорость места - ***1
-# заменить тему письма в 201 строке - msg['Subject']
-
+# ...
+# --- msc file ---
+# msc_mail_server = 'test.com'
+# msc_login_user = 'test'
+# msc_login_pass = 'test'
+# msc_from_address = 'test@test.ru'
+# msc_test_address = 'test@test.ru'
+# msc_subject_text = 'subject text'
+# msc_flag_sending = False/True
+# --- msc file ---
 # ...
 # INSTALL
 # pip install openpyxl
 # pip install PyQt5
-
+# ...
 # COMPILE
 # pyinstaller -F -w main.py
 # ...
@@ -56,15 +61,15 @@ class RecipientData:
 
     # метод получения всех значений аргументов
     def get_all_info(self):
-        return f'Объект {self.get_obj_name()}, ' \
-               f'{id(self)}, ' \
-               f'{self.num = }, ' \
-               f'{self.fam = }, ' \
-               f'{self.im = }, ' \
-               f'{self.otch = }, ' \
-               f'{self.email = }, ' \
-               f'{self.mno_code = }, ' \
-               f'{self.text_message = }, ' \
+        return f'Объект {self.get_obj_name()}, '\
+               f'{id(self)}, '\
+               f'{self.num = }, '\
+               f'{self.fam = }, '\
+               f'{self.im = }, '\
+               f'{self.otch = }, '\
+               f'{self.email = }, '\
+               f'{self.mno_code = }, '\
+               f'{self.text_message = }, '\
                f'{self.flag_send_message = }'
 
     # метод получения имени экземпляра
@@ -176,8 +181,8 @@ class Thread(PyQt5.QtCore.QThread):
 
         print()
         print(f'примерное время выполнения '
-              f'{self.time_count(RecipientData.count_recipient, q_pocket, q_messages, send_delay)}'
-              f' секунд')
+              f'{self.time_count(RecipientData.count_recipient, q_pocket, q_messages, send_delay)} '
+              f'секунд')
 
         # передача в сигналы данных для настройки прогресс-бара
         self.signal_progress_bar_setMaximum.emit(RecipientData.count_recipient)
@@ -218,10 +223,11 @@ class Thread(PyQt5.QtCore.QThread):
 
                 except Exception as _ex:
                     # информационное окно об ошибке при отправке сообщения
-                    self.window_info = PyQt5.QtWidgets.QMessageBox()
-                    self.window_info.setWindowTitle('Ошибка')
-                    self.window_info.setText(f'Ошибка при отправке.\n{_ex}')
-                    self.window_info.exec_()
+                    PyQt5.QtWidgets.QMessageBox.information(self, 'Ошибка', f'Ошибка при отправке.\n{_ex}')
+                    # self.window_info = PyQt5.QtWidgets.QMessageBox()
+                    # self.window_info.setWindowTitle('Ошибка')
+                    # self.window_info.setText(f'Ошибка при отправке.\n{_ex}')
+                    # self.window_info.exec_()
 
                 print('____ изменения прогресс-бара')
                 print()
@@ -255,11 +261,14 @@ class Thread(PyQt5.QtCore.QThread):
         time_finish = time.monotonic()
 
         # информационное окно об окончании работы программы
-        self.window_info = PyQt5.QtWidgets.QMessageBox()
-        self.window_info.setWindowTitle('Окончено')
-        self.window_info.setText(f'Файлы закрыты.\n'
-                                 f'Отправка писем сделана за {round(time_finish - time_start, 1)} секунд.')
-        self.window_info.exec_()
+        PyQt5.QtWidgets.QMessageBox.information(self, 'Окончено', f'Файлы закрыты.\n'
+                                                                  f'Отправка писем сделана за '
+                                                                  f'{round(time_finish - time_start, 1)} секунд.')
+        # self.window_info = PyQt5.QtWidgets.QMessageBox()
+        # self.window_info.setWindowTitle('Окончено')
+        # self.window_info.setText(f'Файлы закрыты.\n'
+        #                          f'Отправка писем сделана за {round(time_finish - time_start, 1)} секунд.')
+        # self.window_info.exec_()
 
         # отправка сигнала о том, что все действия в потоке закончились
         self.signal_finish_thread.emit()
@@ -271,7 +280,6 @@ class Thread(PyQt5.QtCore.QThread):
         print('_____!!!!!!!!!_____ отдельный поток принудительно остановлен')
         self.signal_finish_thread.emit()
         self.terminate()
-        self.thread = {}
 
         # очистка переменых после отправки почты
         self.clean_vals()
@@ -327,9 +335,9 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         # количество писем в одном пакете отправки, в штуках
         self.q_pocket = 5
         # задержка между письмами в пакете при отправке, в секундах
-        self.q_messages = 3
+        self.q_messages = 1  # 3
         # задержка между отправками пакетов, в секундах
-        self.send_delay = 300  # 5 минут
+        self.send_delay = 1  # 300 # 5 минут
 
         # главное окно, надпись на нём и размеры
         self.setWindowTitle('Рассылка почты из XLS файла на основе шаблона HTML')
@@ -415,8 +423,9 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         # lineEdit_q_pocket
         self.lineEdit_q_pocket = PyQt5.QtWidgets.QLineEdit(self)
         self.lineEdit_q_pocket.setObjectName('lineEdit_q_pocket')
+        self.lineEdit_q_pocket.setPlaceholderText('Введите число')
         self.lineEdit_q_pocket.setText(str(self.q_pocket))
-        self.lineEdit_q_pocket.setGeometry(PyQt5.QtCore.QRect(10, 160, 90, 20))
+        self.lineEdit_q_pocket.setGeometry(PyQt5.QtCore.QRect(10, 160, 110, 20))
         self.lineEdit_q_pocket.setClearButtonEnabled(True)
         self.lineEdit_q_pocket.setEnabled(False)
         self.lineEdit_q_pocket.setToolTip(self.lineEdit_q_pocket.objectName())
@@ -436,8 +445,9 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         # lineEdit_q_messages
         self.lineEdit_q_messages = PyQt5.QtWidgets.QLineEdit(self)
         self.lineEdit_q_messages.setObjectName('lineEdit_q_messages')
+        self.lineEdit_q_messages.setPlaceholderText('Введите число')
         self.lineEdit_q_messages.setText(str(self.q_messages))
-        self.lineEdit_q_messages.setGeometry(PyQt5.QtCore.QRect(10, 220, 90, 20))
+        self.lineEdit_q_messages.setGeometry(PyQt5.QtCore.QRect(10, 220, 110, 20))
         self.lineEdit_q_messages.setClearButtonEnabled(True)
         self.lineEdit_q_messages.setEnabled(False)
         self.lineEdit_q_messages.setToolTip(self.lineEdit_q_messages.objectName())
@@ -457,8 +467,9 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         # lineEdit_mail_delay
         self.lineEdit_mail_delay = PyQt5.QtWidgets.QLineEdit(self)
         self.lineEdit_mail_delay.setObjectName('lineEdit_mail_delay')
+        self.lineEdit_mail_delay.setPlaceholderText('Введите число')
         self.lineEdit_mail_delay.setText(str(self.send_delay))
-        self.lineEdit_mail_delay.setGeometry(PyQt5.QtCore.QRect(10, 280, 90, 20))
+        self.lineEdit_mail_delay.setGeometry(PyQt5.QtCore.QRect(10, 280, 110, 25))
         self.lineEdit_mail_delay.setClearButtonEnabled(True)
         self.lineEdit_mail_delay.setEnabled(False)
         self.lineEdit_mail_delay.setToolTip(self.lineEdit_mail_delay.objectName())
@@ -466,7 +477,7 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         # lineEdit_subject_letter
         self.lineEdit_subject_letter = PyQt5.QtWidgets.QLineEdit(self)
         self.lineEdit_subject_letter.setObjectName('lineEdit_subject_letter')
-        self.lineEdit_subject_letter.setText('Тема письма - проверка отправки почты HTML письмом!')
+        self.lineEdit_subject_letter.setPlaceholderText('Введите тему письма!')
         self.lineEdit_subject_letter.setGeometry(PyQt5.QtCore.QRect(10, 320, 320, 25))
         self.lineEdit_subject_letter.setClearButtonEnabled(True)
         self.lineEdit_subject_letter.setEnabled(False)
@@ -528,9 +539,22 @@ class Window(PyQt5.QtWidgets.QMainWindow):
     def init_thread(self):
         # выбор функции зависит от наполненности словаря с потоком
         if not self.thread:
-            self.start_thread()
+            if self.check_fields():
+                self.start_thread()
+            else:
+                PyQt5.QtWidgets.QMessageBox.information(self, 'Внимание', 'Заполните все поля правильно')
         else:
             self.stop_thread()
+
+    # подготовка к созданию потока, проверка всех полей на форме
+    def check_fields(self):
+        if all((self.lineEdit_q_messages.text(),
+                self.lineEdit_q_pocket.text(),
+                self.lineEdit_mail_delay.text(),
+                self.lineEdit_subject_letter.text())):
+            return True
+        else:
+            return False
 
     # метод старта потока и привязка сигналов к функциям
     def start_thread(self):
@@ -548,14 +572,16 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         self.thread['Thread'].start()
         self.thread['Thread'].signal_progress_bar.connect(self.change_progressbarstat_val)
         self.thread['Thread'].signal_finish_thread.connect(self.finished)
-        self.thread['Thread'].signal_progress_bar_setMaximum.connect(self.change_progressbarstat_setMaximum)
+        self.thread['Thread'].signal_progress_bar_setMaximum.connect(self.change_progressbarstat_set_maximum)
 
         # деактивация объектов на форме
         self.activate_obj_on_form(0)
 
     # метод остановки потока и обнуление словаря потока
     def stop_thread(self):
+        # останавливаю работающий поток
         self.thread['Thread'].stop()
+        # очищаю словарь потоков
         self.thread = {}
         # активация объектов на форме
         self.activate_obj_on_form(1)
@@ -567,7 +593,7 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         self.activate_obj_on_form(1)
 
     # метод для изменения максимального значения прогресс-бара на форме
-    def change_progressbarstat_setMaximum(self, val_int):
+    def change_progressbarstat_set_maximum(self, val_int):
         self.progressBarStat.setMaximum(val_int)
 
     # метод для изменения прогресс-бара на форме
@@ -598,19 +624,13 @@ class Window(PyQt5.QtWidgets.QMainWindow):
             self.lineEdit_subject_letter.setEnabled(False)
             self.pushButton_send_mail.setText('Прекратить отправку')
         elif action_todo == 1:
-            if all((self.lineEdit_subject_letter.text(),
-                        self.lineEdit_q_pocket.text(),
-                        self.lineEdit_q_messages.text(),
-                        self.lineEdit_mail_delay.text())):
-                self.toolButton_select_html_file.setEnabled(True)
-                self.toolButton_select_xls_file.setEnabled(True)
-                self.pushButton_send_test_mail.setEnabled(True)
-                self.checkBox_inviz.setChecked(False)
-                self.checkBox_inviz.setEnabled(True)
-                self.lineEdit_subject_letter.setEnabled(True)
-                self.pushButton_send_mail.setText('Отправьте почту')
-            else:
-                print('заполните путые поля')
+            self.toolButton_select_html_file.setEnabled(True)
+            self.toolButton_select_xls_file.setEnabled(True)
+            self.pushButton_send_test_mail.setEnabled(True)
+            self.checkBox_inviz.setChecked(False)
+            self.checkBox_inviz.setEnabled(True)
+            self.lineEdit_subject_letter.setEnabled(True)
+            self.pushButton_send_mail.setText('Отправьте почту')
 
     # событие - нажатие на кнопку выбора файла
     def select_file(self):
@@ -692,20 +712,21 @@ class Window(PyQt5.QtWidgets.QMainWindow):
             # print('Электронное письмо отправлено удачно!')
 
             # информационное окно об удачной отправке тестового письма
-            self.window_info = PyQt5.QtWidgets.QMessageBox()
-            self.window_info.setWindowTitle('Отправлено')
-            self.window_info.setText(f'Тестовое письмо отправлено на почту {msc.msc_test_address}.')
-            self.window_info.exec_()
+            PyQt5.QtWidgets.QMessageBox.information(self, 'Отправлено', f'Тестовое письмо отправлено '
+                                                                        f'на почту {msc.msc_test_address}.')
+            # self.window_info = PyQt5.QtWidgets.QMessageBox()
+            # self.window_info.setWindowTitle('Отправлено')
+            # self.window_info.setText(f'Тестовое письмо отправлено на почту {msc.msc_test_address}.')
+            # self.window_info.exec_()
 
             return 'Электронное письмо отправлено удачно!'
         except Exception as _ex:
-            # print(f'{_ex}\nЭлектронное письмо не отправлено, проверьте логин-пароль!')
-
             # информационное окно об ошибке при отправке сообщения
-            self.window_info = PyQt5.QtWidgets.QMessageBox()
-            self.window_info.setWindowTitle('Ошибка')
-            self.window_info.setText(f'Ошибка при отправке.\n{_ex}')
-            self.window_info.exec_()
+            PyQt5.QtWidgets.QMessageBox.information(self, 'Ошибка', f'Ошибка при отправке.\n{_ex}')
+            # self.window_info = PyQt5.QtWidgets.QMessageBox()
+            # self.window_info.setWindowTitle('Ошибка')
+            # self.window_info.setText(f'Ошибка при отправке.\n{_ex}')
+            # self.window_info.exec_()
 
             return f'{_ex}\nЭлектронное письмо не отправлено, проверьте логин-пароль!'
 
@@ -720,9 +741,10 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         # TODO
         # тут дописать функцию, описание вверху
         if isinstance(data_in, int):
-            return data_in
+            return True
         else:
-            return "".join(char for char in data_in if char.isdecimal())
+            # "".join(char for char in data_in if char.isdecimal())
+            return False
 
 
 # создание основного окна
@@ -737,3 +759,17 @@ def main_app():
 # запуск основного окна
 if __name__ == '__main__':
     main_app()
+
+    # def button_clicked(self):
+    #     lineEdits =  self.findChildren(QLineEdit)
+    #     text = ''
+    #     for lineEdit in lineEdits:
+    #         if not lineEdit.text():
+    #             print(f'Заполните {lineEdit.objectName()}')
+    #             text = f'{text}Заполните {lineEdit.objectName()}\n'
+    #     if text:
+    #         msg = QtWidgets.QMessageBox.information(
+    #             self, 'Внимание', text)
+    #     else:
+    #         msg = QtWidgets.QMessageBox.information(
+    #             self, 'Информация', 'Все lineEdits заполнены.')
