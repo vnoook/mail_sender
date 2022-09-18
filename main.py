@@ -537,20 +537,22 @@ class Window(PyQt5.QtWidgets.QMainWindow):
 
     # метод инициализации "что нужно делать" - стартовать или останавливать поток
     def init_thread(self):
-        # выбор функции зависит от наполненности словаря с потоком
+        # выбор функции зависит от пустоты словаря
+        # если там есть поток, то надо стопнуть, если нет потока, то запустить
         if not self.thread:
             if self.check_fields():
                 self.start_thread()
             else:
-                PyQt5.QtWidgets.QMessageBox.information(self, 'Внимание', 'Заполните все поля правильно')
+                PyQt5.QtWidgets.QMessageBox.information(self, 'Внимание', 'Заполните все поля правильно!')
+                self.change_progressbarstat_val(0)
         else:
             self.stop_thread()
 
     # подготовка к созданию потока, проверка всех полей на форме
     def check_fields(self):
-        if all((self.lineEdit_q_messages.text(),
-                self.lineEdit_q_pocket.text(),
-                self.lineEdit_mail_delay.text(),
+        if all((self.check_is_digit(self.lineEdit_q_messages.text()),
+                self.check_is_digit(self.lineEdit_q_pocket.text()),
+                self.check_is_digit(self.lineEdit_mail_delay.text()),
                 self.lineEdit_subject_letter.text())):
             return True
         else:
@@ -735,15 +737,22 @@ class Window(PyQt5.QtWidgets.QMainWindow):
     def click_on_btn_exit():
         exit()
 
-    # проверка строки на числовое значение - взять число из поля или взять значение по умолчанию
+    # проверка строки на числовое значение в строке на форме
+    # число в строке должно быть больше 0, потому что в этих полях вводятся задержки в секундах
     @staticmethod
-    def check_is_digit(data_in):
-        # TODO
-        # тут дописать функцию, описание вверху
-        if isinstance(data_in, int):
-            return True
-        else:
-            # "".join(char for char in data_in if char.isdecimal())
+    def check_is_digit(data):
+        try:
+            data_int = int(data)
+            # print(f'{data = }, {data_int = }, func = ', end='')
+            if data_int > 0:
+                # print(True)
+                return True
+            else:
+                # print(False)
+                # PyQt5.QtWidgets.QMessageBox.information(self, 'Внимание', 'Число должно быть больше нуля!')
+                return False
+        except ValueError as err:
+            # PyQt5.QtWidgets.QMessageBox.information(self, 'Внимание', 'В строке должно быть число больше нуля!')
             return False
 
 
