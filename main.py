@@ -565,11 +565,10 @@ class Window(PyQt5.QtWidgets.QMainWindow):
                 flag_check = True
             else:
                 flag_check = False
-                # obj.setText('')
                 obj.clear()
 
         # кортеж проверяемых данных из полей объектов на форме и проверка их на пустоту
-        # на пустоту проверяю первым делом потому, что тема письма может быть только непустой,
+        # тема письма может быть только непустой,
         # остальные поля могут быть заполненными, но заполнены неправильными данными
         tuple_of_fields = (self.check_is_digit(q_mes.text()),
                            self.check_is_digit(q_poc.text()),
@@ -578,11 +577,9 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         if all(tuple_of_fields):
             flag_check = True
         else:
-            for field in tuple_fields__for_digits:
-                print(field)
             flag_check = False
 
-
+        # установка итогового результата изходя из значения флага
         if flag_check:
             return True
         else:
