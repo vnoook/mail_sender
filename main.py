@@ -1,8 +1,6 @@
 # TODO
-# сделать сопоставление задержек с полями на форме, с их проверкой на числа
 # сделать проверку на отправленность и предложить повторную отправку неотправленных писем
 # сделать функцию отправки сообщения, в тестовом и в обычном месте кода
-# дописать функцию check_is_digit
 # заменить несколько функций с вкл-выкл объектов на форме на одну универсальную
 # заменить создание объектов на создание в словаре
 # проверить на скорость места - ***1
@@ -550,10 +548,42 @@ class Window(PyQt5.QtWidgets.QMainWindow):
 
     # подготовка к созданию потока, проверка всех полей на форме
     def check_fields(self):
-        if all((self.check_is_digit(self.lineEdit_q_messages.text()),
-                self.check_is_digit(self.lineEdit_q_pocket.text()),
-                self.check_is_digit(self.lineEdit_mail_delay.text()),
-                self.lineEdit_subject_letter.text())):
+        # флаг правильности заполненных полей
+        flag_check = False
+
+        # объекты которые проверяются
+        q_mes = self.lineEdit_q_messages
+        q_poc = self.lineEdit_q_pocket
+        m_del = self.lineEdit_mail_delay
+        s_let = self.lineEdit_subject_letter
+
+        # кортеж полей с числами и проверка на введённое число,
+        # если не число, то поле становится пустым
+        tuple_fields__for_digits = (q_mes, q_poc, m_del)
+        for obj in tuple_fields__for_digits:
+            if self.check_is_digit(obj.text()):
+                flag_check = True
+            else:
+                flag_check = False
+                # obj.setText('')
+                obj.clear()
+
+        # кортеж проверяемых данных из полей объектов на форме и проверка их на пустоту
+        # на пустоту проверяю первым делом потому, что тема письма может быть только непустой,
+        # остальные поля могут быть заполненными, но заполнены неправильными данными
+        tuple_of_fields = (self.check_is_digit(q_mes.text()),
+                           self.check_is_digit(q_poc.text()),
+                           self.check_is_digit(m_del.text()),
+                           s_let.text())
+        if all(tuple_of_fields):
+            flag_check = True
+        else:
+            for field in tuple_fields__for_digits:
+                print(field)
+            flag_check = False
+
+
+        if flag_check:
             return True
         else:
             return False
@@ -732,15 +762,10 @@ class Window(PyQt5.QtWidgets.QMainWindow):
 
             return f'{_ex}\nЭлектронное письмо не отправлено, проверьте логин-пароль!'
 
-    # событие - нажатие на кнопку Выход
-    @staticmethod
-    def click_on_btn_exit():
-        exit()
-
     # проверка строки на числовое значение в строке на форме
     # число в строке должно быть больше 0, потому что в этих полях вводятся задержки в секундах
-    @staticmethod
-    def check_is_digit(data):
+    # @staticmethod
+    def check_is_digit(self, data):
         try:
             data_int = int(data)
             # print(f'{data = }, {data_int = }, func = ', end='')
@@ -754,6 +779,11 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         except ValueError as err:
             # PyQt5.QtWidgets.QMessageBox.information(self, 'Внимание', 'В строке должно быть число больше нуля!')
             return False
+
+    # событие - нажатие на кнопку Выход
+    @staticmethod
+    def click_on_btn_exit():
+        exit()
 
 
 # создание основного окна
@@ -771,14 +801,3 @@ if __name__ == '__main__':
 
     # def button_clicked(self):
     #     lineEdits =  self.findChildren(QLineEdit)
-    #     text = ''
-    #     for lineEdit in lineEdits:
-    #         if not lineEdit.text():
-    #             print(f'Заполните {lineEdit.objectName()}')
-    #             text = f'{text}Заполните {lineEdit.objectName()}\n'
-    #     if text:
-    #         msg = QtWidgets.QMessageBox.information(
-    #             self, 'Внимание', text)
-    #     else:
-    #         msg = QtWidgets.QMessageBox.information(
-    #             self, 'Информация', 'Все lineEdits заполнены.')
