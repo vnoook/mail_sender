@@ -88,25 +88,32 @@ class RecipientData:
 
 # класс потока, для отправки почты в отдельном потоке
 class Thread(PyQt5.QtCore.QThread):
-    # сигналы для прогресс-бара, окончания потока
+    """Класс отдельного потока для отправки сообщений"""
+
+    # сигналы для прогресс-бара, информационного сообщения, окончания потока
     signal_progress_bar = PyQt5.QtCore.pyqtSignal(int)
     signal_progress_bar_setMaximum = PyQt5.QtCore.pyqtSignal(int)
     signal_actual_doing = PyQt5.QtCore.pyqtSignal(str)
     signal_finish_thread = PyQt5.QtCore.pyqtSignal()
 
+    # инициализация класса потока
     def __init__(self, args_main_form):
         super().__init__()
 
-        # кортеж для передачи свойств с главной формы
+        # кортеж свойств с главной формы в поток
         self.args = args_main_form
         # переменная для окна сообщения
         self.window_info = None
 
+    # предопределённая функция запуска потока
     def run(self):
-        # считаю время 'начало'
+        # подсчёт времени 'начало'
         time_start = time.monotonic()
 
-        # установка текущих значений переменных ожидания
+        # очищение прогресс-бара
+        self.signal_progress_bar.emit(0)
+
+        # установка текущих значений из кортежа свойств формы
         q_pocket = self.args[0]
         q_messages = self.args[1]
         send_delay = self.args[2]
@@ -115,25 +122,38 @@ class Thread(PyQt5.QtCore.QThread):
         subject_letter = self.args[5]
 
         # открываю файл HTML
-        self.signal_actual_doing.emit('открываю файл HTML')
+        self.signal_actual_doing.emit('открытие файла HTML')
         with open(html_file, 'r') as file_html:
             all_strings_html_file = file_html.read()
 
         # открываю файл XLS и выбираю активный лист
-        self.signal_actual_doing.emit('открываю файл XLS')
+        self.signal_actual_doing.emit('открытие файла XLS')
         wb_xls = openpyxl.load_workbook(xls_file)
         wb_xls_s = wb_xls.active
 
         # переменные для обработки XLS
-        list_replaced_words = []  # список слов для замены в HTML файле
+        # список слов для замены в HTML файле
+        list_replaced_words = []
         # счётчик объектов, с 0 потому что первая строка шапка и там нет обрабатываемых данных
         obj_count = 0
         # короткое обращение к объекту, утилитарная переменная
         obj_name = None
 
+        # передача в сигналы данных для настройки прогресс-бара
+        self.signal_progress_bar_setMaximum.emit(wb_xls_s.max_row)
+        self.signal_progress_bar.emit(0)
+
         # получение значений ячеек из XLS файла
-        self.signal_actual_doing.emit('получение значений ячеек из XLS файла')
+        # self.signal_actual_doing.emit('получение значений ячеек из XLS файла')
+        # проход по строкам
         for row_in_xls in range(1, wb_xls_s.max_row + 1):
+            # выдача информации о чтении каждой Х строки файла XLS и изменение прогресс-бара
+            if row_in_xls % 25 == 0:
+                self.signal_actual_doing.emit(f'получение значений ячеек из XLS файла, '
+                                              f'строка {row_in_xls} из {wb_xls_s.max_row} строк')
+            self.signal_progress_bar.emit(row_in_xls)
+
+            # проход по колонкам
             for col_in_xls in range(1, wb_xls_s.max_column + 1):
                 # значение ячейки
                 cell_value = wb_xls_s.cell(row_in_xls, col_in_xls).value
@@ -166,11 +186,15 @@ class Thread(PyQt5.QtCore.QThread):
         self.signal_progress_bar_setMaximum.emit(RecipientData.count_recipient)
         self.signal_progress_bar.emit(0)
 
-        # участок отправки писем и ожиданий времени
+        # участок отправки писем и ожидания времени
+        # утилитарный список для хранения всех номеров объектов, будет использоваться для срезов
         list_recipients = [x for x in range(1, RecipientData.count_recipient + 1)]
+        # проход по всем объектам
         for recipient in range(0, RecipientData.count_recipient, q_pocket):
+            # взятие среза для выбора количества писем в пакете
             list_recipients_pocket = list_recipients[recipient: recipient + q_pocket]
 
+            # проход по срезу, в данном случае это количество в пакете
             for recipient_number in list_recipients_pocket:
                 # короткое обращение к объекту
                 obj_name = globals()['Recipient' + str(recipient_number)]
@@ -181,6 +205,7 @@ class Thread(PyQt5.QtCore.QThread):
                 msg['To'] = obj_name.email
                 msg['Subject'] = str(subject_letter)
 
+                # попытка отправить письмо
                 try:
                     if msc.msc_flag_sending:
                         # создание соединения с сервером
@@ -191,8 +216,6 @@ class Thread(PyQt5.QtCore.QThread):
                         smtp_link.send_message(msg, msc.msc_from_address, obj_name.email)
                         smtp_link.quit()
                         obj_name.flag_send_message = True
-                    else:
-                        self.signal_actual_doing.emit(f'!!! пропускаю отправку, поменяйте файл msc')
 
                 except Exception as _ex:
                     # информационное окно об ошибке при отправке сообщения
@@ -201,40 +224,45 @@ class Thread(PyQt5.QtCore.QThread):
                 # изменения прогресс-бара
                 self.signal_progress_bar.emit(recipient_number)
 
+                # выдача информации и ожидание между письмами
                 if list_recipients_pocket.index(recipient_number) != len(list_recipients_pocket) - 1:
                     self.signal_actual_doing.emit(f'отправилось {recipient_number} письмо,'
                                                   f' осталось {RecipientData.count_recipient - recipient_number} писем')
                     time.sleep(q_messages)
 
+            # выдача информации и ожидание между пакетами
             if len(list_recipients_pocket) == q_pocket:
                 if RecipientData.count_recipient not in list_recipients_pocket:
                     self.signal_actual_doing.emit(f'отправилось {recipient_number} письмо,'
                                                   f' осталось {RecipientData.count_recipient - recipient_number} писем')
                     time.sleep(send_delay)
 
+        # выдача информации об окончании отправки
         self.signal_actual_doing.emit(f' -=- Отправка окончена -=- ')
 
         # очистка переменых после отправки почты
         self.clean_vals()
 
-        # закрываю файл
+        # закрытие файла XLS
         wb_xls.close()
 
-        # считаю время 'конец'
+        # подсчёт времени 'конец'
         time_finish = time.monotonic()
 
-        # информационное окно об окончании работы программы
+        # информационное окно об окончании работ по отправке
         self.window_info = PyQt5.QtWidgets.QMessageBox()
-        self.window_info.setWindowTitle('Окончено')
+        self.window_info.setWindowTitle('Отправка писем окончена')
         self.window_info.setText(f'Файлы закрыты.\n'
-                                 f'Отправка писем сделана за {round(time_finish - time_start, 1)} секунд.')
+                                 f'Отправка писем выполнена за {round(time_finish - time_start, 1)} секунд.')
         self.window_info.exec_()
 
         # отправка сигнала о том, что все действия в потоке закончились
         self.signal_finish_thread.emit()
 
+        # выдача информации об окончании отправки
         self.signal_actual_doing.emit('отправка кончилась')
 
+    # функция при остановке потока вручную
     def stop(self):
         self.signal_actual_doing.emit('отправка принудительно остановлена')
         self.signal_finish_thread.emit()
@@ -279,10 +307,10 @@ class Window(PyQt5.QtWidgets.QMainWindow):
     def __init__(self):
         super().__init__()
 
-        # переменные для создания потока
+        # словарь для хранения потока
         self.thread = {}
 
-        # переменные, атрибуты
+        # переменные
         self.window_info = None
         self.info_for_open_file = None
         self.info_path_open_file = None
@@ -503,18 +531,22 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         self.checkBox_inviz.setText('Хочу редактировать!')
         self.checkBox_inviz.setToolTip(self.checkBox_inviz.objectName())
 
-    # метод инициализации "что нужно делать" - стартовать или останавливать поток
+    # метод инициализации "что нужно делать" с потоком - стартовать или останавливать
     def init_thread(self):
         # выбор функции зависит от пустоты словаря
-        # если там есть поток, то надо стопнуть, если нет потока, то запустить
+        # если там есть поток, то надо стопнуть
+        # если словарь пустой, то запустить
         if not self.thread:
+            # проверка полей формы на правильность заполнения и выбор действия
             if self.check_fields():
                 self.start_thread()
             else:
+                # информационное окно, очистка прогресс-бара и информационной строки
                 PyQt5.QtWidgets.QMessageBox.information(self, 'Внимание', 'Заполните все поля правильно!')
                 self.change_progressbarstat_val(0)
                 self.label_info.clear()
         else:
+            # принудительная остановка потока
             self.stop_thread()
 
     # подготовка к созданию потока, проверка всех полей на форме
@@ -559,6 +591,7 @@ class Window(PyQt5.QtWidgets.QMainWindow):
     # метод старта потока и привязка сигналов к функциям
     def start_thread(self):
         # кортеж для передачи задержек в объект потока
+        # тут смелый int потому, что я выше проверил значения
         args_main_form = (int(self.lineEdit_q_pocket.text()),
                           int(self.lineEdit_q_messages.text()),
                           int(self.lineEdit_mail_delay.text()),
@@ -570,10 +603,10 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         # создание объекта потока
         self.thread['Thread'] = Thread(args_main_form)
         self.thread['Thread'].start()
-        self.thread['Thread'].signal_progress_bar.connect(self.change_progressbarstat_val)
-        self.thread['Thread'].signal_finish_thread.connect(self.finished)
-        self.thread['Thread'].signal_progress_bar_setMaximum.connect(self.change_progressbarstat_set_maximum)
         self.thread['Thread'].signal_actual_doing.connect(self.show_actual_doing)
+        self.thread['Thread'].signal_progress_bar.connect(self.change_progressbarstat_val)
+        self.thread['Thread'].signal_progress_bar_setMaximum.connect(self.change_progressbarstat_set_maximum)
+        self.thread['Thread'].signal_finish_thread.connect(self.finished)
 
         # деактивация объектов на форме
         self.activate_obj_on_form(0)
@@ -589,6 +622,7 @@ class Window(PyQt5.QtWidgets.QMainWindow):
 
     # метод должен успешного окончания потока
     def finished(self):
+        # очистка словаря хранения потока
         self.thread = {}
         # активация объектов на форме
         self.activate_obj_on_form(1)
@@ -601,6 +635,7 @@ class Window(PyQt5.QtWidgets.QMainWindow):
     def change_progressbarstat_val(self, val_int):
         self.progressBarStat.setValue(val_int)
 
+    # метод для передачи информации в информационную строку
     def show_actual_doing(self, string_actual_doing):
         self.label_info.setText(string_actual_doing)
         self.label_info.adjustSize()
@@ -716,7 +751,6 @@ class Window(PyQt5.QtWidgets.QMainWindow):
             # информационное окно об удачной отправке тестового письма
             PyQt5.QtWidgets.QMessageBox.information(self, 'Отправлено', f'Тестовое письмо отправлено '
                                                                         f'на почту {msc.msc_test_address}.')
-            return 'Электронное письмо отправлено удачно!'
 
         except Exception as _ex:
             # информационное окно об ошибке при отправке сообщения
