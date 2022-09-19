@@ -78,8 +78,7 @@ class RecipientData:
     # метод замены тегов в сообщении на значения из экселя
     @staticmethod
     def replace_text_message(mail_tag, mail_tag_value, mail_text):
-        mail_text = mail_text.replace('{{' + mail_tag + '}}', mail_tag_value)
-        # mail_text = mail_text.replace(''.join(('{{', mail_tag, '}}')), mail_tag_value)
+        mail_text = mail_text.replace(''.join(('{{', mail_tag, '}}')), mail_tag_value)
         return mail_text
 
     # переопределение метода для замены тегов в почтовом сообщении
@@ -102,13 +101,11 @@ class Thread(PyQt5.QtCore.QThread):
         super().__init__()
 
         # кортеж для передачи свойств с главной формы
-        self.window_info = None
         self.args = args_main_form
+        # переменная для окна сообщения
+        self.window_info = None
 
     def run(self):
-        # print()
-        # print('_____________ отдельный поток начался')
-
         # считаю время 'начало'
         time_start = time.monotonic()
 
@@ -120,35 +117,25 @@ class Thread(PyQt5.QtCore.QThread):
         xls_file = self.args[4]
         subject_letter = self.args[5]
 
-        # print()
-        # print('____ открываю файл HTML')
-        self.signal_actual_doing.emit('открываю файл HTML')
-
         # открываю файл HTML
+        self.signal_actual_doing.emit('открываю файл HTML')
         with open(html_file, 'r') as file_html:
             all_strings_html_file = file_html.read()
 
-        # print()
-        # print('____ открываю файл XLS')
-        self.signal_actual_doing.emit('открываю файл XLS')
-
         # открываю файл XLS и выбираю активный лист
+        self.signal_actual_doing.emit('открываю файл XLS')
         wb_xls = openpyxl.load_workbook(xls_file)
         wb_xls_s = wb_xls.active
 
         # переменные для обработки XLS
         list_replaced_words = []  # список слов для замены в HTML файле
-
         # счётчик объектов, с 0 потому что первая строка шапка и там нет обрабатываемых данных
         obj_count = 0
         # короткое обращение к объекту, утилитарная переменная
         obj_name = None
 
-        # print()
-        # print('____ получение значений ячеек из XLS файла')
-        self.signal_actual_doing.emit('получение значений ячеек из XLS файла')
-
         # получение значений ячеек из XLS файла
+        self.signal_actual_doing.emit('получение значений ячеек из XLS файла')
         for row_in_xls in range(1, wb_xls_s.max_row + 1):
             for col_in_xls in range(1, wb_xls_s.max_column + 1):
                 # значение ячейки
@@ -178,23 +165,9 @@ class Thread(PyQt5.QtCore.QThread):
                         # заполнение остальных атрибутов по названиям колонок в верхней строке
                         obj_name.__setattr__(wb_xls_s.cell(1, col_in_xls).value, cell_value)
 
-        # print()
-        # # временная выдача данных перед отправкой, потом удалить!!!!!!!!!!!!!!!!
-        # for count_obj in range(1, RecipientData.count_recipient + 1):
-        #     print(f'{globals()["Recipient" + str(count_obj)].get_all_info()}')
-
-        # print()
-        # print(f'примерное время выполнения '
-        #       f'{self.time_count(RecipientData.count_recipient, q_pocket, q_messages, send_delay)} '
-        #       f'секунд')
-
         # передача в сигналы данных для настройки прогресс-бара
         self.signal_progress_bar_setMaximum.emit(RecipientData.count_recipient)
         self.signal_progress_bar.emit(0)
-
-        # print()
-        # print(f'отправка писем - {RecipientData.count_recipient} штук')
-        # self.signal_actual_doing.emit(f'отправка писем - {RecipientData.count_recipient} штук')
 
         # участок отправки писем и ожиданий времени
         list_recipients = [x for x in range(1, RecipientData.count_recipient + 1)]
@@ -205,10 +178,6 @@ class Thread(PyQt5.QtCore.QThread):
                 # короткое обращение к объекту
                 obj_name = globals()['Recipient' + str(recipient_number)]
 
-                # print()
-                # print(f'____ создание текста письма № {recipient_number}')
-                # self.signal_actual_doing.emit(f'создание текста письма № {recipient_number}')
-
                 # создание текста письма
                 msg = email.mime.text.MIMEText(obj_name.text_message, 'html')
                 msg['From'] = msc.msc_from_address
@@ -217,9 +186,6 @@ class Thread(PyQt5.QtCore.QThread):
 
                 try:
                     if msc.msc_flag_sending:
-                        # print('... создание соединения с сервером')
-                        # self.signal_actual_doing.emit(f'создание соединения с сервером')
-
                         # создание соединения с сервером
                         smtp_link = smtplib.SMTP(msc.msc_mail_server)
                         smtp_link.starttls()
@@ -229,21 +195,11 @@ class Thread(PyQt5.QtCore.QThread):
                         smtp_link.quit()
                         obj_name.flag_send_message = True
                     else:
-                        # print('... пропускаю отправку, поменяйте файл msc')
                         self.signal_actual_doing.emit(f'!!! пропускаю отправку, поменяйте файл msc')
 
                 except Exception as _ex:
                     # информационное окно об ошибке при отправке сообщения
                     PyQt5.QtWidgets.QMessageBox.information(self, 'Ошибка', f'Ошибка при отправке.\n{_ex}')
-                    # self.window_info = PyQt5.QtWidgets.QMessageBox()
-                    # self.window_info.setWindowTitle('Ошибка')
-                    # self.window_info.setText(f'Ошибка при отправке.\n{_ex}')
-                    # self.window_info.exec_()
-
-                # print('____ изменения прогресс-бара')
-                # print()
-                # self.signal_actual_doing.emit(f'отправилось {recipient_number} письмо,'
-                #                               f' осталось {RecipientData.count_recipient - recipient_number} писем')
 
                 # изменения прогресс-бара
                 self.signal_progress_bar.emit(recipient_number)
@@ -253,7 +209,6 @@ class Thread(PyQt5.QtCore.QThread):
                     # self.signal_actual_doing.emit(f'задержка в секундах между письмами {q_messages}')
                     self.signal_actual_doing.emit(f'отправилось {recipient_number} письмо,'
                                                   f' осталось {RecipientData.count_recipient - recipient_number} писем')
-
                     time.sleep(q_messages)
 
             if len(list_recipients_pocket) == q_pocket:
@@ -263,16 +218,9 @@ class Thread(PyQt5.QtCore.QThread):
                     # self.signal_actual_doing.emit(f'задержка в секундах между пакетами отправки {send_delay}')
                     self.signal_actual_doing.emit(f'отправилось {recipient_number} письмо,'
                                                   f' осталось {RecipientData.count_recipient - recipient_number} писем')
-
                     time.sleep(send_delay)
 
-        # print(f' -=- Отправка окончена -=- ')
         self.signal_actual_doing.emit(f' -=- Отправка окончена -=- ')
-
-        # # временная выдача данных после отправки, потом удалить!!!!!!!!!!!!!!!!
-        # for count_obj in range(1, RecipientData.count_recipient + 1):
-        #     print(f'{globals()["Recipient" + str(count_obj)].get_all_info()}')
-        # print()
 
         # очистка переменых после отправки почты
         self.clean_vals()
@@ -293,14 +241,10 @@ class Thread(PyQt5.QtCore.QThread):
         # отправка сигнала о том, что все действия в потоке закончились
         self.signal_finish_thread.emit()
 
-        # print()
-        # print('_____________ отдельный поток кончился')
         self.signal_actual_doing.emit('отправка кончилась')
 
     def stop(self):
-        # print('_____!!!!!!!!!_____ отдельный поток принудительно остановлен')
         self.signal_actual_doing.emit('отправка принудительно остановлена')
-
         self.signal_finish_thread.emit()
         self.terminate()
 
@@ -555,8 +499,6 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         self.label_info.clear()
         self.label_info.setGeometry(PyQt5.QtCore.QRect(70, 455, 300, 25))
         self.label_info.setEnabled(False)
-        # self.label_info.setFrameStyle(PyQt5.QtWidgets.QFrame().Box)
-        # self.label_info.setFrameShadow(PyQt5.QtWidgets.QFrame.Sunken)
         self.label_info.adjustSize()
         self.label_info.setToolTip(self.label_info.objectName())
 
@@ -780,24 +722,15 @@ class Window(PyQt5.QtWidgets.QMainWindow):
             else:
                 print('пропускаю отправку, поменяйте файл msc')
             smtp_link.quit()
-            # print('Электронное письмо отправлено удачно!')
 
             # информационное окно об удачной отправке тестового письма
             PyQt5.QtWidgets.QMessageBox.information(self, 'Отправлено', f'Тестовое письмо отправлено '
                                                                         f'на почту {msc.msc_test_address}.')
-            # self.window_info = PyQt5.QtWidgets.QMessageBox()
-            # self.window_info.setWindowTitle('Отправлено')
-            # self.window_info.setText(f'Тестовое письмо отправлено на почту {msc.msc_test_address}.')
-            # self.window_info.exec_()
-
             return 'Электронное письмо отправлено удачно!'
+
         except Exception as _ex:
             # информационное окно об ошибке при отправке сообщения
             PyQt5.QtWidgets.QMessageBox.information(self, 'Ошибка', f'Ошибка при отправке.\n{_ex}')
-            # self.window_info = PyQt5.QtWidgets.QMessageBox()
-            # self.window_info.setWindowTitle('Ошибка')
-            # self.window_info.setText(f'Ошибка при отправке.\n{_ex}')
-            # self.window_info.exec_()
 
             return f'{_ex}\nЭлектронное письмо не отправлено, проверьте логин-пароль!'
 
@@ -807,16 +740,12 @@ class Window(PyQt5.QtWidgets.QMainWindow):
     def check_is_digit(data):
         try:
             data_int = int(data)
-            # print(f'{data = }, {data_int = }, func = ', end='')
             if data_int > 0:
                 # print(True)
                 return True
             else:
-                # print(False)
-                # PyQt5.QtWidgets.QMessageBox.information(self, 'Внимание', 'Число должно быть больше нуля!')
                 return False
         except ValueError:
-            # PyQt5.QtWidgets.QMessageBox.information(self, 'Внимание', 'В строке должно быть число больше нуля!')
             return False
 
     # событие - нажатие на кнопку Выход
