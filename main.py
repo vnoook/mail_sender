@@ -1,13 +1,10 @@
-# TODO
-# сделать проверку на отправленность и предложить повторную отправку неотправленных писем
-# сделать функцию отправки сообщения, в тестовом и в обычном месте кода
-# заменить несколько функций с вкл-выкл объектов на форме на одну универсальную
-# заменить создание объектов на создание в словаре
+# Программа для рассылки HTML писем в виде HTML из XLS файла
 # ...
+# Содержание msc.py файла с настройками:
 # --- msc file ---
 # msc_mail_server = 'test.com'
 # msc_login_user = 'test'
-# msc_login_pass = 'test'
+# msc_login_pass = 'pass'
 # msc_from_address = 'test@test.ru'
 # msc_test_address = 'test@test.ru'
 # msc_subject_text = 'subject text'
@@ -205,17 +202,12 @@ class Thread(PyQt5.QtCore.QThread):
                 self.signal_progress_bar.emit(recipient_number)
 
                 if list_recipients_pocket.index(recipient_number) != len(list_recipients_pocket) - 1:
-                    # print(f'задержка в секундах между письмами {q_messages}')
-                    # self.signal_actual_doing.emit(f'задержка в секундах между письмами {q_messages}')
                     self.signal_actual_doing.emit(f'отправилось {recipient_number} письмо,'
                                                   f' осталось {RecipientData.count_recipient - recipient_number} писем')
                     time.sleep(q_messages)
 
             if len(list_recipients_pocket) == q_pocket:
                 if RecipientData.count_recipient not in list_recipients_pocket:
-                    # print(f'задержка в секундах между пакетами отправки {send_delay}')
-                    # print()
-                    # self.signal_actual_doing.emit(f'задержка в секундах между пакетами отправки {send_delay}')
                     self.signal_actual_doing.emit(f'отправилось {recipient_number} письмо,'
                                                   f' осталось {RecipientData.count_recipient - recipient_number} писем')
                     time.sleep(send_delay)
@@ -302,9 +294,9 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         # количество писем в одном пакете отправки, в штуках
         self.q_pocket = 5
         # задержка между письмами в пакете при отправке, в секундах
-        self.q_messages = 1  # 3
+        self.q_messages = 1 #  3
         # задержка между отправками пакетов, в секундах
-        self.send_delay = 1  # 300 # 5 минут
+        self.send_delay = 1 #  300 # 5 минут
 
         # главное окно, надпись на нём и размеры
         self.setWindowTitle('Рассылка почты из XLS файла на основе шаблона HTML')
@@ -423,7 +415,7 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         # label_mail_delay
         self.label_mail_delay = PyQt5.QtWidgets.QLabel(self)
         self.label_mail_delay.setObjectName('label_mail_delay')
-        self.label_mail_delay.setText('5. Задержка между отправками пакетов, мин.')
+        self.label_mail_delay.setText('5. Задержка между отправками пакетов, сек.')
         self.label_mail_delay.setGeometry(PyQt5.QtCore.QRect(10, 250, 150, 40))
         font = PyQt5.QtGui.QFont()
         font.setPointSize(12)
@@ -719,8 +711,6 @@ class Window(PyQt5.QtWidgets.QMainWindow):
             msg['Subject'] = msc.msc_subject_text
             if msc.msc_flag_sending:
                 smtp_link.send_message(msg, msc.msc_from_address, msc.msc_test_address)
-            else:
-                print('пропускаю отправку, поменяйте файл msc')
             smtp_link.quit()
 
             # информационное окно об удачной отправке тестового письма
@@ -741,7 +731,6 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         try:
             data_int = int(data)
             if data_int > 0:
-                # print(True)
                 return True
             else:
                 return False
@@ -766,6 +755,3 @@ def main_app():
 # запуск основного окна
 if __name__ == '__main__':
     main_app()
-
-    # def button_clicked(self):
-    #     lineEdits =  self.findChildren(QLineEdit)
