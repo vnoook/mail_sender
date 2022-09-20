@@ -122,12 +122,12 @@ class Thread(PyQt5.QtCore.QThread):
         subject_letter = self.args[5]
 
         # открываю файл HTML
-        self.signal_actual_doing.emit('открытие файла HTML')
+        self.signal_actual_doing.emit(f'открытие файла HTML')
         with open(html_file, 'r') as file_html:
             all_strings_html_file = file_html.read()
 
         # открываю файл XLS и выбираю активный лист
-        self.signal_actual_doing.emit('открытие файла XLS')
+        self.signal_actual_doing.emit(f'открытие файла XLS')
         wb_xls = openpyxl.load_workbook(xls_file)
         wb_xls_s = wb_xls.active
 
@@ -144,7 +144,6 @@ class Thread(PyQt5.QtCore.QThread):
         self.signal_progress_bar.emit(0)
 
         # получение значений ячеек из XLS файла
-        # self.signal_actual_doing.emit('получение значений ячеек из XLS файла')
         # проход по строкам
         for row_in_xls in range(1, wb_xls_s.max_row + 1):
             # выдача информации о чтении каждой Х строки файла XLS и изменение прогресс-бара
@@ -219,7 +218,10 @@ class Thread(PyQt5.QtCore.QThread):
 
                 except Exception as _ex:
                     # информационное окно об ошибке при отправке сообщения
-                    PyQt5.QtWidgets.QMessageBox.information(self, 'Ошибка', f'Ошибка при отправке.\n{_ex}')
+                    self.window_info = PyQt5.QtWidgets.QMessageBox()
+                    self.window_info.setWindowTitle('Ошибка')
+                    self.window_info.setText(f'Ошибка при отправке.\n{_ex}')
+                    self.window_info.exec_()
 
                 # изменения прогресс-бара
                 self.signal_progress_bar.emit(recipient_number)
@@ -238,7 +240,7 @@ class Thread(PyQt5.QtCore.QThread):
                     time.sleep(send_delay)
 
         # выдача информации об окончании отправки
-        self.signal_actual_doing.emit(f' -=- Отправка окончена -=- ')
+        self.signal_actual_doing.emit(f'отправка окончена')
 
         # очистка переменых после отправки почты
         self.clean_vals()
@@ -260,11 +262,11 @@ class Thread(PyQt5.QtCore.QThread):
         self.signal_finish_thread.emit()
 
         # выдача информации об окончании отправки
-        self.signal_actual_doing.emit('отправка кончилась')
+        self.signal_actual_doing.emit(f'отправка окончена')
 
     # функция при остановке потока вручную
     def stop(self):
-        self.signal_actual_doing.emit('отправка принудительно остановлена')
+        self.signal_actual_doing.emit(f'отправка принудительно остановлена')
         self.signal_finish_thread.emit()
         self.terminate()
 
@@ -276,7 +278,7 @@ class Thread(PyQt5.QtCore.QThread):
     def clean_vals():
         # удаление объектов отправителей
         for count_obj in range(1, RecipientData.count_recipient + 1):
-            del globals()["Recipient" + str(count_obj)]
+            del globals()['Recipient' + str(count_obj)]
 
         # обнуление счётчика количества объектов для возможности повторной отправки рассылки
         RecipientData.count_recipient = 0
@@ -322,9 +324,9 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         # количество писем в одном пакете отправки, в штуках
         self.q_pocket = 5
         # задержка между письмами в пакете при отправке, в секундах
-        self.q_messages = 1 #  3
+        self.q_messages = 3
         # задержка между отправками пакетов, в секундах
-        self.send_delay = 1 #  300 # 5 минут
+        self.send_delay = 300  # 5 минут
 
         # главное окно, надпись на нём и размеры
         self.setWindowTitle('Рассылка почты из XLS файла на основе шаблона HTML')
@@ -531,7 +533,7 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         self.checkBox_inviz.setText('Хочу редактировать!')
         self.checkBox_inviz.setToolTip(self.checkBox_inviz.objectName())
 
-    # метод инициализации "что нужно делать" с потоком - стартовать или останавливать
+    # метод инициализации 'что нужно делать' с потоком - стартовать или останавливать
     def init_thread(self):
         # выбор функции зависит от пустоты словаря
         # если там есть поток, то надо стопнуть
@@ -755,8 +757,6 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         except Exception as _ex:
             # информационное окно об ошибке при отправке сообщения
             PyQt5.QtWidgets.QMessageBox.information(self, 'Ошибка', f'Ошибка при отправке.\n{_ex}')
-
-            return f'{_ex}\nЭлектронное письмо не отправлено, проверьте логин-пароль!'
 
     # проверка строки на числовое значение в строке на форме
     # число в строке должно быть больше 0, потому что в этих полях вводятся задержки в секундах
