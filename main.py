@@ -242,7 +242,7 @@ class Thread(PyQt5.QtCore.QThread):
         # выдача информации об окончании отправки
         self.signal_actual_doing.emit(f'отправка окончена')
 
-        # очистка переменых после отправки почты
+        # очистка переменных после отправки почты
         self.clean_vals()
 
         # закрытие файла XLS
@@ -270,10 +270,10 @@ class Thread(PyQt5.QtCore.QThread):
         self.signal_finish_thread.emit()
         self.terminate()
 
-        # очистка переменых после отправки почты
+        # очистка переменных после отправки почты
         self.clean_vals()
 
-    # метод очистки переменых после отправки почты
+    # метод очистки переменных после отправки почты
     @staticmethod
     def clean_vals():
         # удаление объектов отправителей
