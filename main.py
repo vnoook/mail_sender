@@ -774,7 +774,7 @@ class Window(PyQt5.QtWidgets.QMainWindow):
     # событие - нажатие на кнопку Выход
     @staticmethod
     def click_on_btn_exit():
-        exit()
+        sys.exit()
 
 
 # создание основного окна
